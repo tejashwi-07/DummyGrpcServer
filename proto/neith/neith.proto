@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package neith;
+
+option go_package = "proto/neith";
+
+service NeithService {
+  rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse) {}
+}
+
+// Request message for the Healthcheck operation
+message HealthCheckRequest {
+  int32 request_value = 1;
+}
+
+// Response message for the Healthcheck operation
+message HealthCheckResponse {
+  bool health_status = 1;
+}

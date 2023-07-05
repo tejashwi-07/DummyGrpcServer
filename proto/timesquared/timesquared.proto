@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package timesquared;
+
+option go_package = "proto/timesquared";
+
+service TimeSquaredService {
+  rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse) {}
+}
+
+message HealthCheckRequest {
+  int32 request_value = 1;
+}
+
+// Response message for the Healthcheck operation
+message HealthCheckResponse {
+  bool health_status = 1;
+}

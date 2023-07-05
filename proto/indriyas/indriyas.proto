@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package indriyas;
+
+// Import necessary dependencies or other proto files if needed
+
+option go_package = "proto/indriyas";
+
+service IndriyasService {
+  // Healthcheck operation
+  rpc Healthcheck(HealthCheckRequest) returns (HealthCheckResponse) {}
+}
+
+// Request message for the Healthcheck operation
+message HealthCheckRequest {
+  int32 request_value = 1;
+}
+
+// Response message for the Healthcheck operation
+message HealthCheckResponse {
+  bool health_status = 1;
+}
+
+// Add any other messages or service operations specific to Apexdrive
