@@ -107,29 +107,39 @@ func (*gatewayServer) NeithStart(ctx context.Context, request *pbGateway.NeithSt
 	return &pbGateway.GatewayResponse{}, nil
 }
 
-func (*gatewayServer) ApexDriveStatus(ctx context.Context, request *pbGateway.ApexDriveStatusRequest) (*pbGateway.GatewayResponse, error) {
-	fmt.Println("Apexdrive status called.")
-	return &pbGateway.GatewayResponse{}, nil
+func (*gatewayServer) ApexDriveStatus(ctx context.Context, request *pbGateway.ApexDriveStatusRequest) (*pbGateway.GatewayResponseforStatus, error) {
+	if request.StatusValue == 1 {
+		return &pbGateway.GatewayResponseforStatus{ServiceStatus: true}, nil
+	}
+	return &pbGateway.GatewayResponseforStatus{ServiceStatus: false}, nil
 }
 
 func (*gatewayServer) MaleniaStatus(ctx context.Context, request *pbGateway.MaleniaStatusRequest) (*pbGateway.GatewayResponse, error) {
-	fmt.Println("Malenia status called.")
-	return &pbGateway.GatewayResponse{}, nil
+	if request.StatusValue == 1 {
+		return &pbGateway.GatewayResponseforStatus{ServiceStatus: true}, nil
+	}
+	return &pbGateway.GatewayResponseforStatus{ServiceStatus: false}, nil
 }
 
 func (*gatewayServer) TimeSquaredStatus(ctx context.Context, request *pbGateway.TimeSquaredStatusRequest) (*pbGateway.GatewayResponse, error) {
-	fmt.Println("TimeSquared status called.")
-	return &pbGateway.GatewayResponse{}, nil
+	if request.StatusValue == 1 {
+		return &pbGateway.GatewayResponseforStatus{ServiceStatus: true}, nil
+	}
+	return &pbGateway.GatewayResponseforStatus{ServiceStatus: false}, nil
 }
 
 func (*gatewayServer) IndriyasStatus(ctx context.Context, request *pbGateway.IndriyasStatusRequest) (*pbGateway.GatewayResponse, error) {
-	fmt.Println("Indriyas status called.")
-	return &pbGateway.GatewayResponse{}, nil
+	if request.StatusValue == 1 {
+		return &pbGateway.GatewayResponseforStatus{ServiceStatus: true}, nil
+	}
+	return &pbGateway.GatewayResponseforStatus{ServiceStatus: false}, nil
 }
 
 func (*gatewayServer) NeithStatus(ctx context.Context, request *pbGateway.NeithStatusRequest) (*pbGateway.GatewayResponse, error) {
-	fmt.Println("Neith status called.")
-	return &pbGateway.GatewayResponse{}, nil
+	if request.StatusValue == 1 {
+		return &pbGateway.GatewayResponseforStatus{ServiceStatus: true}, nil
+	}
+	return &pbGateway.GatewayResponseforStatus{ServiceStatus: false}, nil
 }
 
 
