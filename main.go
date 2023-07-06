@@ -5,7 +5,7 @@ import (
 	"log"
 	"net"
 	"net/http"
-
+	"fmt"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -21,49 +21,62 @@ import (
 
 // Server struct representing our service implementation
 type server struct{}
-type apexDriveServer struct{}
-type maleniaServer struct{}
-type timeSquaredServer struct{}
-type indriyasServer struct{}
-type neithServer struct{}
-type gatewayServer struct{}
+type apexDriveServer struct{
+	pbApexDrive.UnimplementedApexDriveServiceServer
+}
+type maleniaServer struct{
+	pbMalenia.UnimplementedMaleniaServiceServer
+}
+type timeSquaredServer struct{
+	pbTimeSquared.UnimplementedTimeSquaredServiceServer
+}
+type indriyasServer struct{
+	pbIndriyas.UnimplementedIndriyasServiceServer
+}
+type neithServer struct{
+	pbNeith.UnimplementedNeithServiceServer
+}
+type gatewayServer struct{
+	pbGateway.UnimplementedGatewayServiceServer
+}
 
 // SayHello is the implementation of the SayHello method defined in the proto file
 func (*server) SayHello(_ context.Context, in *pbHelloWorld.HelloRequest) (*pbHelloWorld.HelloReply, error) {
 	return &pbHelloWorld.HelloReply{Message: in.Name + " world"}, nil
 }
 
-func (*apexDriveServer) HealthCheck(context.Context, request *pbApexDrive.HealthCheckRequest) (*pbApexDrive.HealthCheckResponse, error) {
-	if request.GetValue() == 1 {
+func (*apexDriveServer) Healthcheck(ctx context.Context, request *pbApexDrive.HealthCheckRequest) (*pbApexDrive.HealthCheckResponse, error) {
+	if request.RequestValue == 1 {
 		return &pbApexDrive.HealthCheckResponse{HealthStatus: true}, nil
 	}
 	return &pbApexDrive.HealthCheckResponse{HealthStatus: false}, nil
 }
 
 // MaleniaService implementation
-func (*maleniaServer) HealthCheck(context.Context, request *pbMalenia.HealthCheckRequest) (*pbMalenia.HealthCheckResponse, error) {
-	if request.GetValue() == 1 {
+func (*maleniaServer) HealthCheck(ctx context.Context, request *pbMalenia.HealthCheckRequest) (*pbMalenia.HealthCheckResponse, error) {
+	if request.RequestValue == 1 {
 		return &pbMalenia.HealthCheckResponse{HealthStatus: true}, nil
 	}
 	return &pbMalenia.HealthCheckResponse{HealthStatus: false}, nil
 }
 
 // TimeSquaredService implementation
-func (*timeSquaredServer) HealthCheck(context.Context, request *pbTimeSquared.HealthCheckRequest) (*pbTimeSquared.HealthCheckResponse, error) {
-	if request.GetValue() == 1 {
+func (*timeSquaredServer) HealthCheck(ctx context.Context, request *pbTimeSquared.HealthCheckRequest) (*pbTimeSquared.HealthCheckResponse, error) {
+	if request.RequestValue == 1 {
 		return &pbTimeSquared.HealthCheckResponse{HealthStatus: true}, nil
 	}
 	return &pbTimeSquared.HealthCheckResponse{HealthStatus: false}, nil
 }
 
-func (*indriyasServer) HealthCheck(context.Context, request *pbIndriyas.HealthCheckRequest) (*pbIndriyas.HealthCheckResponse, error) {
-	if request.GetValue() == 1 {
+func (*indriyasServer) Healthcheck(ctx context.Context, request *pbIndriyas.HealthCheckRequest) (*pbIndriyas.HealthCheckResponse, error) {
+	if request.RequestValue == 1 {
 		return &pbIndriyas.HealthCheckResponse{HealthStatus: true}, nil
 	}
 	return &pbIndriyas.HealthCheckResponse{HealthStatus: false}, nil
+}
 
-func (*neithServer) HealthCheck(context.Context, request *pbNeith.HealthCheckRequest) (*pbNeith.HealthCheckResponse, error) {
-	if request.GetValue() == 1 {
+func (*neithServer) HealthCheck(ctx context.Context, request *pbNeith.HealthCheckRequest) (*pbNeith.HealthCheckResponse, error) {
+	if request.RequestValue == 1 {
 		return &pbNeith.HealthCheckResponse{HealthStatus: true}, nil
 	}
 	return &pbNeith.HealthCheckResponse{HealthStatus: false}, nil
