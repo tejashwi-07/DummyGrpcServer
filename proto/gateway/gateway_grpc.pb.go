@@ -46,15 +46,15 @@ type GatewayServiceClient interface {
 	// Start operation for Neith
 	NeithStart(ctx context.Context, in *NeithStartRequest, opts ...grpc.CallOption) (*GatewayResponse, error)
 	// Status operation for Apexdrive
-	ApexDriveStatus(ctx context.Context, in *ApexDriveStatusRequest, opts ...grpc.CallOption) (*GatewayResponse, error)
+	ApexDriveStatus(ctx context.Context, in *ApexDriveStatusRequest, opts ...grpc.CallOption) (*GatewayResponseforStatus, error)
 	// Status operation for Malenia
-	MaleniaStatus(ctx context.Context, in *MaleniaStatusRequest, opts ...grpc.CallOption) (*GatewayResponse, error)
+	MaleniaStatus(ctx context.Context, in *MaleniaStatusRequest, opts ...grpc.CallOption) (*GatewayResponseforStatus, error)
 	// Status operation for TimeSquared
-	TimeSquaredStatus(ctx context.Context, in *TimeSquaredStatusRequest, opts ...grpc.CallOption) (*GatewayResponse, error)
+	TimeSquaredStatus(ctx context.Context, in *TimeSquaredStatusRequest, opts ...grpc.CallOption) (*GatewayResponseforStatus, error)
 	// Status operation for Indriyas
-	IndriyasStatus(ctx context.Context, in *IndriyasStatusRequest, opts ...grpc.CallOption) (*GatewayResponse, error)
+	IndriyasStatus(ctx context.Context, in *IndriyasStatusRequest, opts ...grpc.CallOption) (*GatewayResponseforStatus, error)
 	// Status operation for Neith
-	NeithStatus(ctx context.Context, in *NeithStatusRequest, opts ...grpc.CallOption) (*GatewayResponse, error)
+	NeithStatus(ctx context.Context, in *NeithStatusRequest, opts ...grpc.CallOption) (*GatewayResponseforStatus, error)
 }
 
 type gatewayServiceClient struct {
@@ -110,8 +110,8 @@ func (c *gatewayServiceClient) NeithStart(ctx context.Context, in *NeithStartReq
 	return out, nil
 }
 
-func (c *gatewayServiceClient) ApexDriveStatus(ctx context.Context, in *ApexDriveStatusRequest, opts ...grpc.CallOption) (*GatewayResponse, error) {
-	out := new(GatewayResponse)
+func (c *gatewayServiceClient) ApexDriveStatus(ctx context.Context, in *ApexDriveStatusRequest, opts ...grpc.CallOption) (*GatewayResponseforStatus, error) {
+	out := new(GatewayResponseforStatus)
 	err := c.cc.Invoke(ctx, GatewayService_ApexDriveStatus_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -119,8 +119,8 @@ func (c *gatewayServiceClient) ApexDriveStatus(ctx context.Context, in *ApexDriv
 	return out, nil
 }
 
-func (c *gatewayServiceClient) MaleniaStatus(ctx context.Context, in *MaleniaStatusRequest, opts ...grpc.CallOption) (*GatewayResponse, error) {
-	out := new(GatewayResponse)
+func (c *gatewayServiceClient) MaleniaStatus(ctx context.Context, in *MaleniaStatusRequest, opts ...grpc.CallOption) (*GatewayResponseforStatus, error) {
+	out := new(GatewayResponseforStatus)
 	err := c.cc.Invoke(ctx, GatewayService_MaleniaStatus_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -128,8 +128,8 @@ func (c *gatewayServiceClient) MaleniaStatus(ctx context.Context, in *MaleniaSta
 	return out, nil
 }
 
-func (c *gatewayServiceClient) TimeSquaredStatus(ctx context.Context, in *TimeSquaredStatusRequest, opts ...grpc.CallOption) (*GatewayResponse, error) {
-	out := new(GatewayResponse)
+func (c *gatewayServiceClient) TimeSquaredStatus(ctx context.Context, in *TimeSquaredStatusRequest, opts ...grpc.CallOption) (*GatewayResponseforStatus, error) {
+	out := new(GatewayResponseforStatus)
 	err := c.cc.Invoke(ctx, GatewayService_TimeSquaredStatus_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -137,8 +137,8 @@ func (c *gatewayServiceClient) TimeSquaredStatus(ctx context.Context, in *TimeSq
 	return out, nil
 }
 
-func (c *gatewayServiceClient) IndriyasStatus(ctx context.Context, in *IndriyasStatusRequest, opts ...grpc.CallOption) (*GatewayResponse, error) {
-	out := new(GatewayResponse)
+func (c *gatewayServiceClient) IndriyasStatus(ctx context.Context, in *IndriyasStatusRequest, opts ...grpc.CallOption) (*GatewayResponseforStatus, error) {
+	out := new(GatewayResponseforStatus)
 	err := c.cc.Invoke(ctx, GatewayService_IndriyasStatus_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -146,8 +146,8 @@ func (c *gatewayServiceClient) IndriyasStatus(ctx context.Context, in *IndriyasS
 	return out, nil
 }
 
-func (c *gatewayServiceClient) NeithStatus(ctx context.Context, in *NeithStatusRequest, opts ...grpc.CallOption) (*GatewayResponse, error) {
-	out := new(GatewayResponse)
+func (c *gatewayServiceClient) NeithStatus(ctx context.Context, in *NeithStatusRequest, opts ...grpc.CallOption) (*GatewayResponseforStatus, error) {
+	out := new(GatewayResponseforStatus)
 	err := c.cc.Invoke(ctx, GatewayService_NeithStatus_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -170,15 +170,15 @@ type GatewayServiceServer interface {
 	// Start operation for Neith
 	NeithStart(context.Context, *NeithStartRequest) (*GatewayResponse, error)
 	// Status operation for Apexdrive
-	ApexDriveStatus(context.Context, *ApexDriveStatusRequest) (*GatewayResponse, error)
+	ApexDriveStatus(context.Context, *ApexDriveStatusRequest) (*GatewayResponseforStatus, error)
 	// Status operation for Malenia
-	MaleniaStatus(context.Context, *MaleniaStatusRequest) (*GatewayResponse, error)
+	MaleniaStatus(context.Context, *MaleniaStatusRequest) (*GatewayResponseforStatus, error)
 	// Status operation for TimeSquared
-	TimeSquaredStatus(context.Context, *TimeSquaredStatusRequest) (*GatewayResponse, error)
+	TimeSquaredStatus(context.Context, *TimeSquaredStatusRequest) (*GatewayResponseforStatus, error)
 	// Status operation for Indriyas
-	IndriyasStatus(context.Context, *IndriyasStatusRequest) (*GatewayResponse, error)
+	IndriyasStatus(context.Context, *IndriyasStatusRequest) (*GatewayResponseforStatus, error)
 	// Status operation for Neith
-	NeithStatus(context.Context, *NeithStatusRequest) (*GatewayResponse, error)
+	NeithStatus(context.Context, *NeithStatusRequest) (*GatewayResponseforStatus, error)
 	mustEmbedUnimplementedGatewayServiceServer()
 }
 
@@ -201,19 +201,19 @@ func (UnimplementedGatewayServiceServer) IndriyasStart(context.Context, *Indriya
 func (UnimplementedGatewayServiceServer) NeithStart(context.Context, *NeithStartRequest) (*GatewayResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method NeithStart not implemented")
 }
-func (UnimplementedGatewayServiceServer) ApexDriveStatus(context.Context, *ApexDriveStatusRequest) (*GatewayResponse, error) {
+func (UnimplementedGatewayServiceServer) ApexDriveStatus(context.Context, *ApexDriveStatusRequest) (*GatewayResponseforStatus, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ApexDriveStatus not implemented")
 }
-func (UnimplementedGatewayServiceServer) MaleniaStatus(context.Context, *MaleniaStatusRequest) (*GatewayResponse, error) {
+func (UnimplementedGatewayServiceServer) MaleniaStatus(context.Context, *MaleniaStatusRequest) (*GatewayResponseforStatus, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method MaleniaStatus not implemented")
 }
-func (UnimplementedGatewayServiceServer) TimeSquaredStatus(context.Context, *TimeSquaredStatusRequest) (*GatewayResponse, error) {
+func (UnimplementedGatewayServiceServer) TimeSquaredStatus(context.Context, *TimeSquaredStatusRequest) (*GatewayResponseforStatus, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method TimeSquaredStatus not implemented")
 }
-func (UnimplementedGatewayServiceServer) IndriyasStatus(context.Context, *IndriyasStatusRequest) (*GatewayResponse, error) {
+func (UnimplementedGatewayServiceServer) IndriyasStatus(context.Context, *IndriyasStatusRequest) (*GatewayResponseforStatus, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method IndriyasStatus not implemented")
 }
-func (UnimplementedGatewayServiceServer) NeithStatus(context.Context, *NeithStatusRequest) (*GatewayResponse, error) {
+func (UnimplementedGatewayServiceServer) NeithStatus(context.Context, *NeithStatusRequest) (*GatewayResponseforStatus, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method NeithStatus not implemented")
 }
 func (UnimplementedGatewayServiceServer) mustEmbedUnimplementedGatewayServiceServer() {}
