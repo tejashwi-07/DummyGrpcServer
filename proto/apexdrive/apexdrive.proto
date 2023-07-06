@@ -4,7 +4,7 @@ package apexdrive;
 
 // Import necessary dependencies or other proto files if needed
 
-option go_package = "proto/apexdrive";
+option go_package = "github.com/tejashwi-07/DummyGrpcServer/proto;apexdrive";
 
 // Define the Apexdrive service
 service ApexDriveService {

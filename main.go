@@ -10,13 +10,13 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
-	pbHelloWorld "github.com/iamrajiv/helloworld-grpc-gateway/proto/helloworld"
-	pbApexDrive "helloworld-grpc-gateway/proto/apexdrive"
-	pbMalenia "proto/malenia"
-	pbTimeSquared "proto/timesquared"
-	pbIndriyas "proto/indriyas"
-	pbNeith "proto/neith"
-	pbGateway "proto/gateway"
+	pbHelloWorld "github.com/tejashwi-07/DummyGrpcServer/proto/helloworld"
+	pbApexDrive "github.com/tejashwi-07/DummyGrpcServer/proto/apexdrive"
+	pbMalenia "github.com/tejashwi-07/DummyGrpcServer/proto/malenia"
+	pbTimeSquared "github.com/tejashwi-07/DummyGrpcServer/proto/timesquared"
+	pbIndriyas "github.com/tejashwi-07/DummyGrpcServer/proto/indriyas"
+	pbNeith "github.com/tejashwi-07/DummyGrpcServer/proto/neith"
+	pbGateway "github.com/tejashwi-07/DummyGrpcServer/proto/gateway"
 )
 
 // Server struct representing our service implementation

@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package malenia;
 
-option go_package = "proto/malenia";
+option go_package = "github.com/tejashwi-07/DummyGrpcServer/proto;malenia";
 
 service MaleniaService {
   rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse) {}

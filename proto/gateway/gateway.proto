@@ -4,7 +4,7 @@ package gateway;
 
 // Import necessary dependencies or other proto files if needed
 
-option go_package = "proto/gateway";
+option go_package = "github.com/tejashwi-07/DummyGrpcServer/proto;gateway";
 
 // Define the Gateway service
 service GatewayService {

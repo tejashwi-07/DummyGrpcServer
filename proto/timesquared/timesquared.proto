@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package timesquared;
 
-option go_package = "proto/timesquared";
+option go_package = "github.com/tejashwi-07/DummyGrpcServer/proto;timesquared";
 
 service TimeSquaredService {
   rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse) {}

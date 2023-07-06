@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package neith;
 
-option go_package = "proto/neith";
+option go_package = "github.com/tejashwi-07/DummyGrpcServer/proto;neith";
 
 service NeithService {
   rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse) {}

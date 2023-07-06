@@ -4,7 +4,7 @@ package indriyas;
 
 // Import necessary dependencies or other proto files if needed
 
-option go_package = "proto/indriyas";
+option go_package = "github.com/tejashwi-07/DummyGrpcServer/proto;indriyas";
 
 service IndriyasService {
   // Healthcheck operation
