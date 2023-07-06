@@ -20,15 +20,15 @@ service GatewayService {
   rpc NeithStart(NeithStartRequest) returns (GatewayResponse) {}
 
   // Status operation for Apexdrive
-  rpc ApexDriveStatus(ApexDriveStatusRequest) returns (GatewayResponse) {}
+  rpc ApexDriveStatus(ApexDriveStatusRequest) returns (GatewayResponseforStatus) {}
   // Status operation for Malenia
-  rpc MaleniaStatus(MaleniaStatusRequest) returns (GatewayResponse) {}
+  rpc MaleniaStatus(MaleniaStatusRequest) returns (GatewayResponseforStatus) {}
   // Status operation for TimeSquared
-  rpc TimeSquaredStatus(TimeSquaredStatusRequest) returns (GatewayResponse) {}
+  rpc TimeSquaredStatus(TimeSquaredStatusRequest) returns (GatewayResponseforStatus) {}
   // Status operation for Indriyas
-  rpc IndriyasStatus(IndriyasStatusRequest) returns (GatewayResponse) {}
+  rpc IndriyasStatus(IndriyasStatusRequest) returns (GatewayResponseforStatus) {}
   // Status operation for Neith
-  rpc NeithStatus(NeithStatusRequest) returns (GatewayResponse) {}
+  rpc NeithStatus(NeithStatusRequest) returns (GatewayResponseforStatus) {}
 }
 
 // Request message for the start operation
@@ -58,30 +58,40 @@ message NeithStartRequest {
 
 // Request message for the status operation
 message ApexDriveStatusRequest {
+    int32 status_value = 1;
   // Add any fields specific to Apexdrive status request
 }
 
 // Request message for the status operation
 message MaleniaStatusRequest {
+    int32 status_value = 1;
   // Add any fields specific to Malenia status request
 }
 
 // Request message for the status operation
 message TimeSquaredStatusRequest {
+    int32 status_value = 1;
   // Add any fields specific to TimeSquared status request
 }
 
 // Request message for the status operation
 message IndriyasStatusRequest {
+    int32 status_value = 1;
   // Add any fields specific to Indriyas status request
 }
 
 // Request message for the status operation
 message NeithStatusRequest {
+    int32 status_value = 1;
   // Add any fields specific to Neith status request
 }
 
 // Response message for the Gateway service
 message GatewayResponse {
+  // Add any fields specific to the gateway response
+}
+
+message GatewayResponseforStatus {
+    bool service_status = 1;
   // Add any fields specific to the gateway response
 }
