@@ -114,28 +114,28 @@ func (*gatewayServer) ApexDriveStatus(ctx context.Context, request *pbGateway.Ap
 	return &pbGateway.GatewayResponseforStatus{ServiceStatus: false}, nil
 }
 
-func (*gatewayServer) MaleniaStatus(ctx context.Context, request *pbGateway.MaleniaStatusRequest) (*pbGateway.GatewayResponse, error) {
+func (*gatewayServer) MaleniaStatus(ctx context.Context, request *pbGateway.MaleniaStatusRequest) (*pbGateway.GatewayResponseforStatus, error) {
 	if request.StatusValue == 1 {
 		return &pbGateway.GatewayResponseforStatus{ServiceStatus: true}, nil
 	}
 	return &pbGateway.GatewayResponseforStatus{ServiceStatus: false}, nil
 }
 
-func (*gatewayServer) TimeSquaredStatus(ctx context.Context, request *pbGateway.TimeSquaredStatusRequest) (*pbGateway.GatewayResponse, error) {
+func (*gatewayServer) TimeSquaredStatus(ctx context.Context, request *pbGateway.TimeSquaredStatusRequest) (*pbGateway.GatewayResponseforStatus, error) {
 	if request.StatusValue == 1 {
 		return &pbGateway.GatewayResponseforStatus{ServiceStatus: true}, nil
 	}
 	return &pbGateway.GatewayResponseforStatus{ServiceStatus: false}, nil
 }
 
-func (*gatewayServer) IndriyasStatus(ctx context.Context, request *pbGateway.IndriyasStatusRequest) (*pbGateway.GatewayResponse, error) {
+func (*gatewayServer) IndriyasStatus(ctx context.Context, request *pbGateway.IndriyasStatusRequest) (*pbGateway.GatewayResponseforStatus, error) {
 	if request.StatusValue == 1 {
 		return &pbGateway.GatewayResponseforStatus{ServiceStatus: true}, nil
 	}
 	return &pbGateway.GatewayResponseforStatus{ServiceStatus: false}, nil
 }
 
-func (*gatewayServer) NeithStatus(ctx context.Context, request *pbGateway.NeithStatusRequest) (*pbGateway.GatewayResponse, error) {
+func (*gatewayServer) NeithStatus(ctx context.Context, request *pbGateway.NeithStatusRequest) (*pbGateway.GatewayResponseforStatus, error) {
 	if request.StatusValue == 1 {
 		return &pbGateway.GatewayResponseforStatus{ServiceStatus: true}, nil
 	}
