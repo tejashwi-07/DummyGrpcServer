@@ -107,6 +107,31 @@ func (*gatewayServer) NeithStart(ctx context.Context, request *pbGateway.NeithSt
 	return &pbGateway.GatewayResponse{}, nil
 }
 
+func (*gatewayServer) ApexDriveStop(ctx context.Context, request *pbGateway.ApexDriveStopRequest) (*pbGateway.GatewayResponse, error) {
+	fmt.Println("Apexdrive service stopped.")
+	return &pbGateway.GatewayResponse{}, nil
+}
+
+func (*gatewayServer) MaleniaStop(ctx context.Context, request *pbGateway.MaleniaStopRequest) (*pbGateway.GatewayResponse, error) {
+	fmt.Println("Malenia service stopped.")
+	return &pbGateway.GatewayResponse{}, nil
+}
+
+func (*gatewayServer) TimeSquaredStop(ctx context.Context, request *pbGateway.TimeSquaredStopRequest) (*pbGateway.GatewayResponse, error) {
+	fmt.Println("TimeSquared service stopped.")
+	return &pbGateway.GatewayResponse{}, nil
+}
+
+func (*gatewayServer) IndriyasStop(ctx context.Context, request *pbGateway.IndriyasStopRequest) (*pbGateway.GatewayResponse, error) {
+	fmt.Println("Indriyas service stopped.")
+	return &pbGateway.GatewayResponse{}, nil
+}
+
+func (*gatewayServer) NeithStop(ctx context.Context, request *pbGateway.NeithStopRequest) (*pbGateway.GatewayResponse, error) {
+	fmt.Println("Neith service stopped.")
+	return &pbGateway.GatewayResponse{}, nil
+}
+
 func (*gatewayServer) ApexDriveStatus(ctx context.Context, request *pbGateway.ApexDriveStatusRequest) (*pbGateway.GatewayResponseforStatus, error) {
 	if request.StatusValue == 1 {
 		return &pbGateway.GatewayResponseforStatus{ServiceStatus: true}, nil

@@ -24,6 +24,11 @@ const (
 	GatewayService_TimeSquaredStart_FullMethodName  = "/gateway.GatewayService/TimeSquaredStart"
 	GatewayService_IndriyasStart_FullMethodName     = "/gateway.GatewayService/IndriyasStart"
 	GatewayService_NeithStart_FullMethodName        = "/gateway.GatewayService/NeithStart"
+	GatewayService_ApexDriveStop_FullMethodName     = "/gateway.GatewayService/ApexDriveStop"
+	GatewayService_MaleniaStop_FullMethodName       = "/gateway.GatewayService/MaleniaStop"
+	GatewayService_TimeSquaredStop_FullMethodName   = "/gateway.GatewayService/TimeSquaredStop"
+	GatewayService_IndriyasStop_FullMethodName      = "/gateway.GatewayService/IndriyasStop"
+	GatewayService_NeithStop_FullMethodName         = "/gateway.GatewayService/NeithStop"
 	GatewayService_ApexDriveStatus_FullMethodName   = "/gateway.GatewayService/ApexDriveStatus"
 	GatewayService_MaleniaStatus_FullMethodName     = "/gateway.GatewayService/MaleniaStatus"
 	GatewayService_TimeSquaredStatus_FullMethodName = "/gateway.GatewayService/TimeSquaredStatus"
@@ -45,6 +50,11 @@ type GatewayServiceClient interface {
 	IndriyasStart(ctx context.Context, in *IndriyasStartRequest, opts ...grpc.CallOption) (*GatewayResponse, error)
 	// Start operation for Neith
 	NeithStart(ctx context.Context, in *NeithStartRequest, opts ...grpc.CallOption) (*GatewayResponse, error)
+	ApexDriveStop(ctx context.Context, in *ApexDriveStopRequest, opts ...grpc.CallOption) (*GatewayResponse, error)
+	MaleniaStop(ctx context.Context, in *MaleniaStopRequest, opts ...grpc.CallOption) (*GatewayResponse, error)
+	TimeSquaredStop(ctx context.Context, in *TimeSquaredStopRequest, opts ...grpc.CallOption) (*GatewayResponse, error)
+	IndriyasStop(ctx context.Context, in *IndriyasStopRequest, opts ...grpc.CallOption) (*GatewayResponse, error)
+	NeithStop(ctx context.Context, in *NeithStopRequest, opts ...grpc.CallOption) (*GatewayResponse, error)
 	// Status operation for Apexdrive
 	ApexDriveStatus(ctx context.Context, in *ApexDriveStatusRequest, opts ...grpc.CallOption) (*GatewayResponseforStatus, error)
 	// Status operation for Malenia
@@ -110,6 +120,51 @@ func (c *gatewayServiceClient) NeithStart(ctx context.Context, in *NeithStartReq
 	return out, nil
 }
 
+func (c *gatewayServiceClient) ApexDriveStop(ctx context.Context, in *ApexDriveStopRequest, opts ...grpc.CallOption) (*GatewayResponse, error) {
+	out := new(GatewayResponse)
+	err := c.cc.Invoke(ctx, GatewayService_ApexDriveStop_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *gatewayServiceClient) MaleniaStop(ctx context.Context, in *MaleniaStopRequest, opts ...grpc.CallOption) (*GatewayResponse, error) {
+	out := new(GatewayResponse)
+	err := c.cc.Invoke(ctx, GatewayService_MaleniaStop_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *gatewayServiceClient) TimeSquaredStop(ctx context.Context, in *TimeSquaredStopRequest, opts ...grpc.CallOption) (*GatewayResponse, error) {
+	out := new(GatewayResponse)
+	err := c.cc.Invoke(ctx, GatewayService_TimeSquaredStop_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *gatewayServiceClient) IndriyasStop(ctx context.Context, in *IndriyasStopRequest, opts ...grpc.CallOption) (*GatewayResponse, error) {
+	out := new(GatewayResponse)
+	err := c.cc.Invoke(ctx, GatewayService_IndriyasStop_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *gatewayServiceClient) NeithStop(ctx context.Context, in *NeithStopRequest, opts ...grpc.CallOption) (*GatewayResponse, error) {
+	out := new(GatewayResponse)
+	err := c.cc.Invoke(ctx, GatewayService_NeithStop_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *gatewayServiceClient) ApexDriveStatus(ctx context.Context, in *ApexDriveStatusRequest, opts ...grpc.CallOption) (*GatewayResponseforStatus, error) {
 	out := new(GatewayResponseforStatus)
 	err := c.cc.Invoke(ctx, GatewayService_ApexDriveStatus_FullMethodName, in, out, opts...)
@@ -169,6 +224,11 @@ type GatewayServiceServer interface {
 	IndriyasStart(context.Context, *IndriyasStartRequest) (*GatewayResponse, error)
 	// Start operation for Neith
 	NeithStart(context.Context, *NeithStartRequest) (*GatewayResponse, error)
+	ApexDriveStop(context.Context, *ApexDriveStopRequest) (*GatewayResponse, error)
+	MaleniaStop(context.Context, *MaleniaStopRequest) (*GatewayResponse, error)
+	TimeSquaredStop(context.Context, *TimeSquaredStopRequest) (*GatewayResponse, error)
+	IndriyasStop(context.Context, *IndriyasStopRequest) (*GatewayResponse, error)
+	NeithStop(context.Context, *NeithStopRequest) (*GatewayResponse, error)
 	// Status operation for Apexdrive
 	ApexDriveStatus(context.Context, *ApexDriveStatusRequest) (*GatewayResponseforStatus, error)
 	// Status operation for Malenia
@@ -200,6 +260,21 @@ func (UnimplementedGatewayServiceServer) IndriyasStart(context.Context, *Indriya
 }
 func (UnimplementedGatewayServiceServer) NeithStart(context.Context, *NeithStartRequest) (*GatewayResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method NeithStart not implemented")
+}
+func (UnimplementedGatewayServiceServer) ApexDriveStop(context.Context, *ApexDriveStopRequest) (*GatewayResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ApexDriveStop not implemented")
+}
+func (UnimplementedGatewayServiceServer) MaleniaStop(context.Context, *MaleniaStopRequest) (*GatewayResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method MaleniaStop not implemented")
+}
+func (UnimplementedGatewayServiceServer) TimeSquaredStop(context.Context, *TimeSquaredStopRequest) (*GatewayResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method TimeSquaredStop not implemented")
+}
+func (UnimplementedGatewayServiceServer) IndriyasStop(context.Context, *IndriyasStopRequest) (*GatewayResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method IndriyasStop not implemented")
+}
+func (UnimplementedGatewayServiceServer) NeithStop(context.Context, *NeithStopRequest) (*GatewayResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method NeithStop not implemented")
 }
 func (UnimplementedGatewayServiceServer) ApexDriveStatus(context.Context, *ApexDriveStatusRequest) (*GatewayResponseforStatus, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ApexDriveStatus not implemented")
@@ -315,6 +390,96 @@ func _GatewayService_NeithStart_Handler(srv interface{}, ctx context.Context, de
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(GatewayServiceServer).NeithStart(ctx, req.(*NeithStartRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _GatewayService_ApexDriveStop_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ApexDriveStopRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GatewayServiceServer).ApexDriveStop(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GatewayService_ApexDriveStop_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GatewayServiceServer).ApexDriveStop(ctx, req.(*ApexDriveStopRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _GatewayService_MaleniaStop_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MaleniaStopRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GatewayServiceServer).MaleniaStop(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GatewayService_MaleniaStop_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GatewayServiceServer).MaleniaStop(ctx, req.(*MaleniaStopRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _GatewayService_TimeSquaredStop_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TimeSquaredStopRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GatewayServiceServer).TimeSquaredStop(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GatewayService_TimeSquaredStop_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GatewayServiceServer).TimeSquaredStop(ctx, req.(*TimeSquaredStopRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _GatewayService_IndriyasStop_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(IndriyasStopRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GatewayServiceServer).IndriyasStop(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GatewayService_IndriyasStop_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GatewayServiceServer).IndriyasStop(ctx, req.(*IndriyasStopRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _GatewayService_NeithStop_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(NeithStopRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GatewayServiceServer).NeithStop(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GatewayService_NeithStop_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GatewayServiceServer).NeithStop(ctx, req.(*NeithStopRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -435,6 +600,26 @@ var GatewayService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "NeithStart",
 			Handler:    _GatewayService_NeithStart_Handler,
+		},
+		{
+			MethodName: "ApexDriveStop",
+			Handler:    _GatewayService_ApexDriveStop_Handler,
+		},
+		{
+			MethodName: "MaleniaStop",
+			Handler:    _GatewayService_MaleniaStop_Handler,
+		},
+		{
+			MethodName: "TimeSquaredStop",
+			Handler:    _GatewayService_TimeSquaredStop_Handler,
+		},
+		{
+			MethodName: "IndriyasStop",
+			Handler:    _GatewayService_IndriyasStop_Handler,
+		},
+		{
+			MethodName: "NeithStop",
+			Handler:    _GatewayService_NeithStop_Handler,
 		},
 		{
 			MethodName: "ApexDriveStatus",

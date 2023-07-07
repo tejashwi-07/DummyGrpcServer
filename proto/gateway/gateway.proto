@@ -19,6 +19,17 @@ service GatewayService {
   // Start operation for Neith
   rpc NeithStart(NeithStartRequest) returns (GatewayResponse) {}
 
+ 
+  rpc ApexDriveStop(ApexDriveStopRequest) returns (GatewayResponse) {}
+  
+  rpc MaleniaStop(MaleniaStopRequest) returns (GatewayResponse) {}
+  
+  rpc TimeSquaredStop(TimeSquaredStopRequest) returns (GatewayResponse) {}
+  
+  rpc IndriyasStop(IndriyasStopRequest) returns (GatewayResponse) {}
+  
+  rpc NeithStop(NeithStopRequest) returns (GatewayResponse) {}
+
   // Status operation for Apexdrive
   rpc ApexDriveStatus(ApexDriveStatusRequest) returns (GatewayResponseforStatus) {}
   // Status operation for Malenia
@@ -55,6 +66,32 @@ message IndriyasStartRequest {
 message NeithStartRequest {
   // Add any fields specific to Neith start request
 }
+
+message ApexDriveStopRequest {
+  // Add any fields specific to Apexdrive start request
+}
+
+// Request message for the start operation
+message MaleniaStopRequest {
+  // Add any fields specific to Malenia start request
+}
+
+// Request message for the start operation
+message TimeSquaredStopRequest {
+  // Add any fields specific to TimeSquared start request
+}
+
+// Request message for the start operation
+message IndriyasStopRequest {
+  // Add any fields specific to Indriyas start request
+}
+
+// Request message for the start operation
+message NeithStopRequest {
+  // Add any fields specific to Neith start request
+}
+
+
 
 // Request message for the status operation
 message ApexDriveStatusRequest {
