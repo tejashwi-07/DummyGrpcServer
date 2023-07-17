@@ -2,47 +2,95 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net"
 	"net/http"
-	"fmt"
-	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
+	"time"
 
-	pbHelloWorld "github.com/tejashwi-07/DummyGrpcServer/proto/helloworld"
+	"github.com/dgrijalva/jwt-go"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	pbApexDrive "github.com/tejashwi-07/DummyGrpcServer/proto/apexdrive"
-	pbMalenia "github.com/tejashwi-07/DummyGrpcServer/proto/malenia"
-	pbTimeSquared "github.com/tejashwi-07/DummyGrpcServer/proto/timesquared"
+	pbAuth "github.com/tejashwi-07/DummyGrpcServer/proto/auth"
+	pbDocker "github.com/tejashwi-07/DummyGrpcServer/proto/docker"
 	pbIndriyas "github.com/tejashwi-07/DummyGrpcServer/proto/indriyas"
+	pbMalenia "github.com/tejashwi-07/DummyGrpcServer/proto/malenia"
 	pbNeith "github.com/tejashwi-07/DummyGrpcServer/proto/neith"
-	pbGateway "github.com/tejashwi-07/DummyGrpcServer/proto/gateway"
+	pbTimeSquared "github.com/tejashwi-07/DummyGrpcServer/proto/timesquared"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/status"
 )
 
 // Server struct representing our service implementation
-type server struct{}
-type apexDriveServer struct{
+
+type apexDriveServer struct {
 	pbApexDrive.UnimplementedApexDriveServiceServer
 }
-type maleniaServer struct{
+type maleniaServer struct {
 	pbMalenia.UnimplementedMaleniaServiceServer
 }
-type timeSquaredServer struct{
+type timeSquaredServer struct {
 	pbTimeSquared.UnimplementedTimeSquaredServiceServer
 }
-type indriyasServer struct{
+type indriyasServer struct {
 	pbIndriyas.UnimplementedIndriyasServiceServer
 }
-type neithServer struct{
+type neithServer struct {
 	pbNeith.UnimplementedNeithServiceServer
 }
-type gatewayServer struct{
-	pbGateway.UnimplementedGatewayServiceServer
+type dockerServer struct {
+	pbDocker.UnimplementedDockerServiceServer
 }
 
-// SayHello is the implementation of the SayHello method defined in the proto file
-func (*server) SayHello(_ context.Context, in *pbHelloWorld.HelloRequest) (*pbHelloWorld.HelloReply, error) {
-	return &pbHelloWorld.HelloReply{Message: in.Name + " world"}, nil
+type authServer struct {
+	pbAuth.UnimplementedAuthServiceServer
+}
+
+func (s *authServer) Authenticate(ctx context.Context, req *pbAuth.AuthRequest) (*pbAuth.AuthResponse, error) {
+	// Retrieve the product key from the request
+	productKey := req.ProductKey
+
+	// Perform the authentication logic
+	// Replace this with your actual authentication implementation
+
+	if len(productKey) != 10 {
+		return nil, status.Error(codes.Unauthenticated, "Invalid credentials")
+	}
+
+	claims := jwt.MapClaims{
+		"sub":   "1234567890",
+		"name":  "John Doe",
+		"admin": true,
+		"exp":   time.Now().Add(time.Hour).Unix(), // Expiration time
+	}
+
+	// Generate the JWT token with the claims and secret key
+	secretKey := "my-secret-key"
+
+	// Generate the authentication token
+	token, err := GenerateJWTToken(claims, secretKey)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "Failed to generate token: %v", err)
+	}
+
+	// Create the response with the generated token
+	response := &pbAuth.AuthResponse{
+		TokenValue: token,
+	}
+
+	return response, nil
+}
+
+func GenerateJWTToken(claims jwt.Claims, secretKey string) (string, error) {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenString, err := token.SignedString([]byte(secretKey))
+	if err != nil {
+		return "", err
+	}
+	return tokenString, nil
 }
 
 func (*apexDriveServer) Healthcheck(ctx context.Context, request *pbApexDrive.HealthCheckRequest) (*pbApexDrive.HealthCheckResponse, error) {
@@ -82,91 +130,15 @@ func (*neithServer) HealthCheck(ctx context.Context, request *pbNeith.HealthChec
 	return &pbNeith.HealthCheckResponse{HealthStatus: false}, nil
 }
 
-func (*gatewayServer) ApexDriveStart(ctx context.Context, request *pbGateway.ApexDriveStartRequest) (*pbGateway.GatewayResponse, error) {
-	fmt.Println("Apexdrive service started.")
-	return &pbGateway.GatewayResponse{}, nil
+func (*dockerServer) StartService(ctx context.Context, request *pbDocker.DockerRequest) (*pbDocker.DockerResponse, error) {
+	fmt.Printf("%v started.", request.ServiceName)
+	return &pbDocker.DockerResponse{}, nil
 }
 
-func (*gatewayServer) MaleniaStart(ctx context.Context, request *pbGateway.MaleniaStartRequest) (*pbGateway.GatewayResponse, error) {
-	fmt.Println("Malenia service started.")
-	return &pbGateway.GatewayResponse{}, nil
+func (*dockerServer) StopService(ctx context.Context, request *pbDocker.DockerRequest) (*pbDocker.DockerResponse, error) {
+	fmt.Printf("%v Stopped.", request.ServiceName)
+	return &pbDocker.DockerResponse{}, nil
 }
-
-func (*gatewayServer) TimeSquaredStart(ctx context.Context, request *pbGateway.TimeSquaredStartRequest) (*pbGateway.GatewayResponse, error) {
-	fmt.Println("TimeSquared service started.")
-	return &pbGateway.GatewayResponse{}, nil
-}
-
-func (*gatewayServer) IndriyasStart(ctx context.Context, request *pbGateway.IndriyasStartRequest) (*pbGateway.GatewayResponse, error) {
-	fmt.Println("Indriyas service started.")
-	return &pbGateway.GatewayResponse{}, nil
-}
-
-func (*gatewayServer) NeithStart(ctx context.Context, request *pbGateway.NeithStartRequest) (*pbGateway.GatewayResponse, error) {
-	fmt.Println("Neith service started.")
-	return &pbGateway.GatewayResponse{}, nil
-}
-
-func (*gatewayServer) ApexDriveStop(ctx context.Context, request *pbGateway.ApexDriveStopRequest) (*pbGateway.GatewayResponse, error) {
-	fmt.Println("Apexdrive service stopped.")
-	return &pbGateway.GatewayResponse{}, nil
-}
-
-func (*gatewayServer) MaleniaStop(ctx context.Context, request *pbGateway.MaleniaStopRequest) (*pbGateway.GatewayResponse, error) {
-	fmt.Println("Malenia service stopped.")
-	return &pbGateway.GatewayResponse{}, nil
-}
-
-func (*gatewayServer) TimeSquaredStop(ctx context.Context, request *pbGateway.TimeSquaredStopRequest) (*pbGateway.GatewayResponse, error) {
-	fmt.Println("TimeSquared service stopped.")
-	return &pbGateway.GatewayResponse{}, nil
-}
-
-func (*gatewayServer) IndriyasStop(ctx context.Context, request *pbGateway.IndriyasStopRequest) (*pbGateway.GatewayResponse, error) {
-	fmt.Println("Indriyas service stopped.")
-	return &pbGateway.GatewayResponse{}, nil
-}
-
-func (*gatewayServer) NeithStop(ctx context.Context, request *pbGateway.NeithStopRequest) (*pbGateway.GatewayResponse, error) {
-	fmt.Println("Neith service stopped.")
-	return &pbGateway.GatewayResponse{}, nil
-}
-
-func (*gatewayServer) ApexDriveStatus(ctx context.Context, request *pbGateway.ApexDriveStatusRequest) (*pbGateway.GatewayResponseforStatus, error) {
-	if request.StatusValue == 1 {
-		return &pbGateway.GatewayResponseforStatus{ServiceStatus: true}, nil
-	}
-	return &pbGateway.GatewayResponseforStatus{ServiceStatus: false}, nil
-}
-
-func (*gatewayServer) MaleniaStatus(ctx context.Context, request *pbGateway.MaleniaStatusRequest) (*pbGateway.GatewayResponseforStatus, error) {
-	if request.StatusValue == 1 {
-		return &pbGateway.GatewayResponseforStatus{ServiceStatus: true}, nil
-	}
-	return &pbGateway.GatewayResponseforStatus{ServiceStatus: false}, nil
-}
-
-func (*gatewayServer) TimeSquaredStatus(ctx context.Context, request *pbGateway.TimeSquaredStatusRequest) (*pbGateway.GatewayResponseforStatus, error) {
-	if request.StatusValue == 1 {
-		return &pbGateway.GatewayResponseforStatus{ServiceStatus: true}, nil
-	}
-	return &pbGateway.GatewayResponseforStatus{ServiceStatus: false}, nil
-}
-
-func (*gatewayServer) IndriyasStatus(ctx context.Context, request *pbGateway.IndriyasStatusRequest) (*pbGateway.GatewayResponseforStatus, error) {
-	if request.StatusValue == 1 {
-		return &pbGateway.GatewayResponseforStatus{ServiceStatus: true}, nil
-	}
-	return &pbGateway.GatewayResponseforStatus{ServiceStatus: false}, nil
-}
-
-func (*gatewayServer) NeithStatus(ctx context.Context, request *pbGateway.NeithStatusRequest) (*pbGateway.GatewayResponseforStatus, error) {
-	if request.StatusValue == 1 {
-		return &pbGateway.GatewayResponseforStatus{ServiceStatus: true}, nil
-	}
-	return &pbGateway.GatewayResponseforStatus{ServiceStatus: false}, nil
-}
-
 
 func main() {
 	// Create a listener on TCP port
@@ -178,15 +150,15 @@ func main() {
 	// Create a gRPC server object
 	s := grpc.NewServer()
 	// Attach the Greeter service to the server
-	pbHelloWorld.RegisterGreeterServer(s, &server{})
+	pbAuth.RegisterAuthServiceServer(s, &authServer{})
 	pbApexDrive.RegisterApexDriveServiceServer(s, &apexDriveServer{})
 	pbMalenia.RegisterMaleniaServiceServer(s, &maleniaServer{})
 	pbTimeSquared.RegisterTimeSquaredServiceServer(s, &timeSquaredServer{})
 	pbIndriyas.RegisterIndriyasServiceServer(s, &indriyasServer{})
 	pbNeith.RegisterNeithServiceServer(s, &neithServer{})
-	pbGateway.RegisterGatewayServiceServer(s, &gatewayServer{})
+	pbDocker.RegisterDockerServiceServer(s, &dockerServer{})
 
-
+	s = withAuthInterceptor(s)
 	// Serve gRPC server
 	log.Println("Serving gRPC on 0.0.0.0:8080")
 	go func() {
@@ -206,11 +178,6 @@ func main() {
 
 	// Create a new ServeMux for the gRPC-Gateway
 	gwmux := runtime.NewServeMux()
-	// Register the Greeter service with the gRPC-Gateway
-	err = pbHelloWorld.RegisterGreeterHandler(context.Background(), gwmux, conn)
-	if err != nil {
-		log.Fatalln("Failed to register gateway:", err)
-	}
 
 	// Create a new HTTP server for the gRPC-Gateway
 	gwServer := &http.Server{
@@ -220,4 +187,54 @@ func main() {
 
 	log.Println("Serving gRPC-Gateway on http://0.0.0.0:8090")
 	log.Fatalln(gwServer.ListenAndServe())
+}
+
+func withAuthInterceptor(server *grpc.Server) *grpc.Server {
+	serverOpts := []grpc.ServerOption{
+		grpc.UnaryInterceptor(authInterceptor),
+	}
+	server = grpc.NewServer(serverOpts...)
+	return server
+}
+
+// authInterceptor is the authentication interceptor function.
+func authInterceptor(
+	ctx context.Context,
+	req interface{},
+	info *grpc.UnaryServerInfo,
+	handler grpc.UnaryHandler,
+) (interface{}, error) {
+	// Perform the authentication check here
+	if err := authenticate(ctx); err != nil {
+		// Authentication failed, return an error
+		return nil, status.Errorf(codes.Unauthenticated, "Authentication failed: %v", err)
+	}
+
+	// Authentication succeeded, continue with the request
+	return handler(ctx, req)
+}
+
+// authenticate performs the authentication check.
+// Replace this with your actual authentication logic.
+func authenticate(ctx context.Context) error {
+	// Retrieve the metadata from the gRPC request context
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return status.Error(codes.Unauthenticated, "Metadata not found")
+	}
+
+	// Extract the authentication token from the metadata
+	token := md.Get("authorization")
+	if len(token) == 0 {
+		return status.Error(codes.Unauthenticated, "Missing authentication token")
+	}
+
+	// Validate the authentication token
+	// Replace this with your actual token validation logic
+
+	if len(token) != 10 {
+		return status.Error(codes.Unauthenticated, "Invalid authentication token")
+	}
+
+	return nil
 }

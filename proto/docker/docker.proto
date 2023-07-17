@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package docker;
+
+// Import necessary dependencies or other proto files if needed
+
+option go_package = "github.com/tejashwi-07/DummyGrpcServer/proto;docker";
+
+service DockerService {
+  rpc StartService(DockerRequest) returns (DockerResponse) {}
+  rpc StopService(DockerRequest) returns (DockerResponse) {}
+}
+
+// Request message for the start operation
+message DockerRequest {
+  string service_name = 1;
+}
+
+// Request message for the start operation
+message DockerResponse {
+  // Add any fields specific to Malenia start request
+}
+

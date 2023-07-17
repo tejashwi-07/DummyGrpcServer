@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package auth;
+
+// Import necessary dependencies or other proto files if needed
+
+option go_package = "github.com/tejashwi-07/DummyGrpcServer/proto;auth";
+
+// Define the Apexdrive service
+service AuthService {
+  // Healthcheck operation
+  rpc Authenticate(AuthRequest) returns (AuthResponse) {}
+}
+
+message AuthRequest {
+  string product_key = 1;
+}
+
+
+message AuthResponse {
+  string token_value = 1;
+}
+
