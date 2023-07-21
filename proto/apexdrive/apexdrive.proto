@@ -9,7 +9,7 @@ option go_package = "github.com/tejashwi-07/DummyGrpcServer/proto;apexdrive";
 // Define the Apexdrive service
 service ApexDriveService {
   // Healthcheck operation
-  rpc Healthcheck(HealthCheckRequest) returns (HealthCheckResponse) {}
+  rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse) {}
 }
 
 // Request message for the Healthcheck operation

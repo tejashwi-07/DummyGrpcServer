@@ -8,7 +8,7 @@ option go_package = "github.com/tejashwi-07/DummyGrpcServer/proto;indriyas";
 
 service IndriyasService {
   // Healthcheck operation
-  rpc Healthcheck(HealthCheckRequest) returns (HealthCheckResponse) {}
+  rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse) {}
 }
 
 // Request message for the Healthcheck operation

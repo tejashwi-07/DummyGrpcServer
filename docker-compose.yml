@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  nginx:
+    build: ./nginx
+    ports:
+      - "80:80"
+    restart: "always"
+    networks:
+      - my_network
+
+  engine:
+    build: ./engine
+    ports:  
+      -10000:10000
+    restart: "always"
+    networks:
+      - my_network
+  
+
+networks:
+  my_network:
+    # Add any custom network configuration here if needed

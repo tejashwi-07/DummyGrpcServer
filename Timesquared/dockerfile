@@ -1,0 +1,17 @@
+# Use the official Go module image as the base image
+FROM golang:1.17
+
+# Set the working directory inside the container
+WORKDIR /go/src/timesquared
+
+# Copy the entire apexdrive directory to the container's working directory
+COPY . .
+
+# Build the Go binary of the apexdrive service
+RUN go build -o timesquared-server
+
+# Expose port 10001 for gRPC server
+EXPOSE 10005
+
+# Set the command to run the apexdrive service
+CMD ["./timesquared-server"]

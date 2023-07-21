@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"net"
 	"net/http"
@@ -19,7 +18,6 @@ import (
 	pbTimeSquared "github.com/tejashwi-07/DummyGrpcServer/proto/timesquared"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 )
@@ -93,50 +91,107 @@ func GenerateJWTToken(claims jwt.Claims, secretKey string) (string, error) {
 	return tokenString, nil
 }
 
+func ExtractTokenFromContext(ctx context.Context) (string, error) {
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return "", status.Errorf(codes.Unauthenticated, "Missing metadata")
+	}
+
+	tokens := md.Get("authorization")
+	if len(tokens) == 0 {
+		return "", status.Errorf(codes.Unauthenticated, "Missing authentication token")
+	}
+
+	token := tokens[0] // Assuming a single token is present in the header
+	return token, nil
+}
+
 func (*apexDriveServer) Healthcheck(ctx context.Context, request *pbApexDrive.HealthCheckRequest) (*pbApexDrive.HealthCheckResponse, error) {
+	Token, err := ExtractTokenFromContext(ctx)
+	if err != nil {
+		log.Printf("%v", err)
+		return &pbApexDrive.HealthCheckResponse{HealthStatus: false}, status.Errorf(codes.Unauthenticated, "Missing authentication token")
+	}
+	log.Printf("Token: %v", Token)
 	if request.RequestValue == 1 {
 		return &pbApexDrive.HealthCheckResponse{HealthStatus: true}, nil
 	}
-	return &pbApexDrive.HealthCheckResponse{HealthStatus: false}, nil
+	return &pbApexDrive.HealthCheckResponse{HealthStatus: false}, status.Errorf(codes.Unavailable, "Wrong Request")
 }
 
 // MaleniaService implementation
 func (*maleniaServer) HealthCheck(ctx context.Context, request *pbMalenia.HealthCheckRequest) (*pbMalenia.HealthCheckResponse, error) {
+	Token, err := ExtractTokenFromContext(ctx)
+	if err != nil {
+		log.Printf("%v", err)
+		return &pbMalenia.HealthCheckResponse{HealthStatus: false}, status.Errorf(codes.Unauthenticated, "Missing authentication token")
+	}
+	log.Printf("Token: %v", Token)
 	if request.RequestValue == 1 {
 		return &pbMalenia.HealthCheckResponse{HealthStatus: true}, nil
 	}
-	return &pbMalenia.HealthCheckResponse{HealthStatus: false}, nil
+	return &pbMalenia.HealthCheckResponse{HealthStatus: false}, status.Errorf(codes.Unavailable, "Wrong Request")
 }
 
 // TimeSquaredService implementation
 func (*timeSquaredServer) HealthCheck(ctx context.Context, request *pbTimeSquared.HealthCheckRequest) (*pbTimeSquared.HealthCheckResponse, error) {
+	Token, err := ExtractTokenFromContext(ctx)
+	if err != nil {
+		log.Printf("%v", err)
+		return &pbTimeSquared.HealthCheckResponse{HealthStatus: false}, status.Errorf(codes.Unauthenticated, "Missing authentication token")
+	}
+	log.Printf("Token: %v", Token)
 	if request.RequestValue == 1 {
 		return &pbTimeSquared.HealthCheckResponse{HealthStatus: true}, nil
 	}
-	return &pbTimeSquared.HealthCheckResponse{HealthStatus: false}, nil
+	return &pbTimeSquared.HealthCheckResponse{HealthStatus: false}, status.Errorf(codes.Unavailable, "Wrong Request")
 }
 
 func (*indriyasServer) Healthcheck(ctx context.Context, request *pbIndriyas.HealthCheckRequest) (*pbIndriyas.HealthCheckResponse, error) {
+	Token, err := ExtractTokenFromContext(ctx)
+	if err != nil {
+		log.Printf("%v", err)
+		return &pbIndriyas.HealthCheckResponse{HealthStatus: false}, status.Errorf(codes.Unauthenticated, "Missing authentication token")
+	}
+	log.Printf("Token: %v", Token)
 	if request.RequestValue == 1 {
 		return &pbIndriyas.HealthCheckResponse{HealthStatus: true}, nil
 	}
-	return &pbIndriyas.HealthCheckResponse{HealthStatus: false}, nil
+	return &pbIndriyas.HealthCheckResponse{HealthStatus: false}, status.Errorf(codes.Unavailable, "Wrong Request")
 }
 
 func (*neithServer) HealthCheck(ctx context.Context, request *pbNeith.HealthCheckRequest) (*pbNeith.HealthCheckResponse, error) {
+	Token, err := ExtractTokenFromContext(ctx)
+	if err != nil {
+		log.Printf("%v", err)
+		return &pbNeith.HealthCheckResponse{HealthStatus: false}, status.Errorf(codes.Unauthenticated, "Missing authentication token")
+	}
+	log.Printf("Token: %v", Token)
 	if request.RequestValue == 1 {
 		return &pbNeith.HealthCheckResponse{HealthStatus: true}, nil
 	}
-	return &pbNeith.HealthCheckResponse{HealthStatus: false}, nil
+	return &pbNeith.HealthCheckResponse{HealthStatus: false}, status.Errorf(codes.Unavailable, "Wrong Request")
 }
 
 func (*dockerServer) StartService(ctx context.Context, request *pbDocker.DockerRequest) (*pbDocker.DockerResponse, error) {
-	fmt.Printf("%v started.", request.ServiceName)
+	Token, err := ExtractTokenFromContext(ctx)
+	if err != nil {
+		log.Printf("%v", err)
+		return &pbDocker.DockerResponse{}, status.Errorf(codes.Unauthenticated, "Missing authentication token")
+	}
+	log.Printf("Token: %v", Token)
+	log.Printf("%v started.", request.ServiceName)
 	return &pbDocker.DockerResponse{}, nil
 }
 
 func (*dockerServer) StopService(ctx context.Context, request *pbDocker.DockerRequest) (*pbDocker.DockerResponse, error) {
-	fmt.Printf("%v Stopped.", request.ServiceName)
+	Token, err := ExtractTokenFromContext(ctx)
+	if err != nil {
+		log.Printf("%v", err)
+		return &pbDocker.DockerResponse{}, status.Errorf(codes.Unauthenticated, "Missing authentication token")
+	}
+	log.Printf("Token: %v", Token)
+	log.Printf("%v Stopped.", request.ServiceName)
 	return &pbDocker.DockerResponse{}, nil
 }
 
@@ -149,8 +204,9 @@ func main() {
 
 	// Create a gRPC server object
 	s := grpc.NewServer()
-	// Attach the Greeter service to the server
 	pbAuth.RegisterAuthServiceServer(s, &authServer{})
+	// Attach the Greeter service to the server
+
 	pbApexDrive.RegisterApexDriveServiceServer(s, &apexDriveServer{})
 	pbMalenia.RegisterMaleniaServiceServer(s, &maleniaServer{})
 	pbTimeSquared.RegisterTimeSquaredServiceServer(s, &timeSquaredServer{})
@@ -158,7 +214,6 @@ func main() {
 	pbNeith.RegisterNeithServiceServer(s, &neithServer{})
 	pbDocker.RegisterDockerServiceServer(s, &dockerServer{})
 
-	s = withAuthInterceptor(s)
 	// Serve gRPC server
 	log.Println("Serving gRPC on 0.0.0.0:8080")
 	go func() {
@@ -166,12 +221,7 @@ func main() {
 	}()
 
 	// Create a client connection to the gRPC server we just started
-	conn, err := grpc.DialContext(
-		context.Background(),
-		"0.0.0.0:8080",
-		grpc.WithBlock(),
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-	)
+
 	if err != nil {
 		log.Fatalln("Failed to dial server:", err)
 	}
@@ -187,54 +237,4 @@ func main() {
 
 	log.Println("Serving gRPC-Gateway on http://0.0.0.0:8090")
 	log.Fatalln(gwServer.ListenAndServe())
-}
-
-func withAuthInterceptor(server *grpc.Server) *grpc.Server {
-	serverOpts := []grpc.ServerOption{
-		grpc.UnaryInterceptor(authInterceptor),
-	}
-	server = grpc.NewServer(serverOpts...)
-	return server
-}
-
-// authInterceptor is the authentication interceptor function.
-func authInterceptor(
-	ctx context.Context,
-	req interface{},
-	info *grpc.UnaryServerInfo,
-	handler grpc.UnaryHandler,
-) (interface{}, error) {
-	// Perform the authentication check here
-	if err := authenticate(ctx); err != nil {
-		// Authentication failed, return an error
-		return nil, status.Errorf(codes.Unauthenticated, "Authentication failed: %v", err)
-	}
-
-	// Authentication succeeded, continue with the request
-	return handler(ctx, req)
-}
-
-// authenticate performs the authentication check.
-// Replace this with your actual authentication logic.
-func authenticate(ctx context.Context) error {
-	// Retrieve the metadata from the gRPC request context
-	md, ok := metadata.FromIncomingContext(ctx)
-	if !ok {
-		return status.Error(codes.Unauthenticated, "Metadata not found")
-	}
-
-	// Extract the authentication token from the metadata
-	token := md.Get("authorization")
-	if len(token) == 0 {
-		return status.Error(codes.Unauthenticated, "Missing authentication token")
-	}
-
-	// Validate the authentication token
-	// Replace this with your actual token validation logic
-
-	if len(token) != 10 {
-		return status.Error(codes.Unauthenticated, "Invalid authentication token")
-	}
-
-	return nil
 }

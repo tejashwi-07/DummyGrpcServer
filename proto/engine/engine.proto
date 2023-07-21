@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package engine;
+
+option go_package = "github.com/tejashwi-07/DummyGrpcServer/proto;engine";
+
+
+service MicroserviceController {
+  rpc Authenticate(AuthRequest) returns (AuthResponse) {}
+  rpc StartServer(ServerRequest) returns (ServerResponse) {}
+  rpc StopServer(ServerRequest) returns (ServerResponse) {}
+}
+
+message AuthRequest {
+  string product_key = 1;
+}
+
+message AuthResponse {
+  string token_value = 1;
+}
+
+message ServerRequest {
+  string service_name = 1;
+}
+
+message ServerResponse {
+  string message = 1;
+}
