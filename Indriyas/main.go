@@ -1,4 +1,4 @@
-package indriyas
+package main
 
 import (
 	"context"
@@ -12,7 +12,6 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
-
 
 type indriyasServer struct {
 	pbIndriyas.UnimplementedIndriyasServiceServer
@@ -36,7 +35,7 @@ func main() {
 	// Create a gRPC server object
 	s := grpc.NewServer()
 	pbIndriyas.RegisterIndriyasServiceServer(s, &indriyasServer{})
-	
+
 	log.Println("Serving gRPC on 0.0.0.0:10002")
 	go func() {
 		log.Fatalln(s.Serve(lis))

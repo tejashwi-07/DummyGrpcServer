@@ -1,11 +1,11 @@
-package malenia
+package main
 
 import (
 	"context"
 	"log"
 	"net"
 	"net/http"
-	
+
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	pbMalenia "github.com/tejashwi-07/DummyGrpcServer/proto/malenia"
 	"google.golang.org/grpc"
@@ -13,7 +13,6 @@ import (
 
 	"google.golang.org/grpc/status"
 )
-
 
 type maleniaServer struct {
 	pbMalenia.UnimplementedMaleniaServiceServer
@@ -37,7 +36,7 @@ func main() {
 	// Create a gRPC server object
 	s := grpc.NewServer()
 	pbMalenia.RegisterMaleniaServiceServer(s, &maleniaServer{})
-	
+
 	log.Println("Serving gRPC on 0.0.0.0:10004")
 	go func() {
 		log.Fatalln(s.Serve(lis))

@@ -6,7 +6,6 @@ COPY nginx.conf /etc/nginx/nginx.conf
 
 # Expose the ports that Nginx will listen on
 EXPOSE 80
-EXPOSE 443
 
 # Start the Nginx server when the container is run
 CMD ["nginx", "-g", "daemon off;"]

@@ -19,7 +19,7 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	ApexDriveService_Healthcheck_FullMethodName = "/apexdrive.ApexDriveService/Healthcheck"
+	ApexDriveService_HealthCheck_FullMethodName = "/apexdrive.ApexDriveService/HealthCheck"
 )
 
 // ApexDriveServiceClient is the client API for ApexDriveService service.
@@ -27,7 +27,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ApexDriveServiceClient interface {
 	// Healthcheck operation
-	Healthcheck(ctx context.Context, in *HealthCheckRequest, opts ...grpc.CallOption) (*HealthCheckResponse, error)
+	HealthCheck(ctx context.Context, in *HealthCheckRequest, opts ...grpc.CallOption) (*HealthCheckResponse, error)
 }
 
 type apexDriveServiceClient struct {
@@ -38,9 +38,9 @@ func NewApexDriveServiceClient(cc grpc.ClientConnInterface) ApexDriveServiceClie
 	return &apexDriveServiceClient{cc}
 }
 
-func (c *apexDriveServiceClient) Healthcheck(ctx context.Context, in *HealthCheckRequest, opts ...grpc.CallOption) (*HealthCheckResponse, error) {
+func (c *apexDriveServiceClient) HealthCheck(ctx context.Context, in *HealthCheckRequest, opts ...grpc.CallOption) (*HealthCheckResponse, error) {
 	out := new(HealthCheckResponse)
-	err := c.cc.Invoke(ctx, ApexDriveService_Healthcheck_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, ApexDriveService_HealthCheck_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +52,7 @@ func (c *apexDriveServiceClient) Healthcheck(ctx context.Context, in *HealthChec
 // for forward compatibility
 type ApexDriveServiceServer interface {
 	// Healthcheck operation
-	Healthcheck(context.Context, *HealthCheckRequest) (*HealthCheckResponse, error)
+	HealthCheck(context.Context, *HealthCheckRequest) (*HealthCheckResponse, error)
 	mustEmbedUnimplementedApexDriveServiceServer()
 }
 
@@ -60,8 +60,8 @@ type ApexDriveServiceServer interface {
 type UnimplementedApexDriveServiceServer struct {
 }
 
-func (UnimplementedApexDriveServiceServer) Healthcheck(context.Context, *HealthCheckRequest) (*HealthCheckResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Healthcheck not implemented")
+func (UnimplementedApexDriveServiceServer) HealthCheck(context.Context, *HealthCheckRequest) (*HealthCheckResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method HealthCheck not implemented")
 }
 func (UnimplementedApexDriveServiceServer) mustEmbedUnimplementedApexDriveServiceServer() {}
 
@@ -76,20 +76,20 @@ func RegisterApexDriveServiceServer(s grpc.ServiceRegistrar, srv ApexDriveServic
 	s.RegisterService(&ApexDriveService_ServiceDesc, srv)
 }
 
-func _ApexDriveService_Healthcheck_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _ApexDriveService_HealthCheck_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(HealthCheckRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ApexDriveServiceServer).Healthcheck(ctx, in)
+		return srv.(ApexDriveServiceServer).HealthCheck(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: ApexDriveService_Healthcheck_FullMethodName,
+		FullMethod: ApexDriveService_HealthCheck_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ApexDriveServiceServer).Healthcheck(ctx, req.(*HealthCheckRequest))
+		return srv.(ApexDriveServiceServer).HealthCheck(ctx, req.(*HealthCheckRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -102,8 +102,8 @@ var ApexDriveService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*ApexDriveServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "Healthcheck",
-			Handler:    _ApexDriveService_Healthcheck_Handler,
+			MethodName: "HealthCheck",
+			Handler:    _ApexDriveService_HealthCheck_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   nginx:
-    build: ./nginx
+    image: img-nginx:latest
     ports:
       - "80:80"
     restart: "always"
@@ -10,9 +10,9 @@ services:
       - my_network
 
   engine:
-    build: ./engine
+    image: img-engine:latest
     ports:  
-      -10000:10000
+      - "10000:10000"
     restart: "always"
     networks:
       - my_network

@@ -1,11 +1,11 @@
-package neith
+package main
 
 import (
 	"context"
 	"log"
 	"net"
 	"net/http"
-	
+
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	pbNeith "github.com/tejashwi-07/DummyGrpcServer/proto/neith"
 	"google.golang.org/grpc"
@@ -13,7 +13,6 @@ import (
 
 	"google.golang.org/grpc/status"
 )
-
 
 type neithServer struct {
 	pbNeith.UnimplementedNeithServiceServer
@@ -37,7 +36,7 @@ func main() {
 	// Create a gRPC server object
 	s := grpc.NewServer()
 	pbNeith.RegisterNeithServiceServer(s, &neithServer{})
-	
+
 	log.Println("Serving gRPC on 0.0.0.0:10003")
 	go func() {
 		log.Fatalln(s.Serve(lis))

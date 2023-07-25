@@ -4,55 +4,27 @@ import (
 	"context"
 	"log"
 	"net"
-	"net/http"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
-	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
-	pbApexDrive "github.com/tejashwi-07/DummyGrpcServer/proto/apexdrive"
-	pbAuth "github.com/tejashwi-07/DummyGrpcServer/proto/auth"
-	pbDocker "github.com/tejashwi-07/DummyGrpcServer/proto/docker"
-	pbIndriyas "github.com/tejashwi-07/DummyGrpcServer/proto/indriyas"
-	pbMalenia "github.com/tejashwi-07/DummyGrpcServer/proto/malenia"
-	pbNeith "github.com/tejashwi-07/DummyGrpcServer/proto/neith"
-	pbTimeSquared "github.com/tejashwi-07/DummyGrpcServer/proto/timesquared"
+
+	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/filters"
+	"github.com/docker/docker/client"
+
+	pbEngine "github.com/tejashwi-07/DummyGrpcServer/proto/engine"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 )
 
-// Server struct representing our service implementation
-
-type apexDriveServer struct {
-	pbApexDrive.UnimplementedApexDriveServiceServer
-}
-type maleniaServer struct {
-	pbMalenia.UnimplementedMaleniaServiceServer
-}
-type timeSquaredServer struct {
-	pbTimeSquared.UnimplementedTimeSquaredServiceServer
-}
-type indriyasServer struct {
-	pbIndriyas.UnimplementedIndriyasServiceServer
-}
-type neithServer struct {
-	pbNeith.UnimplementedNeithServiceServer
-}
-type dockerServer struct {
-	pbDocker.UnimplementedDockerServiceServer
+type engineServer struct {
+	pbEngine.UnimplementedMicroserviceControllerServer
 }
 
-type authServer struct {
-	pbAuth.UnimplementedAuthServiceServer
-}
-
-func (s *authServer) Authenticate(ctx context.Context, req *pbAuth.AuthRequest) (*pbAuth.AuthResponse, error) {
-	// Retrieve the product key from the request
+func (s *engineServer) Authenticate(ctx context.Context, req *pbEngine.AuthRequest) (*pbEngine.AuthResponse, error) {
 	productKey := req.ProductKey
-
-	// Perform the authentication logic
-	// Replace this with your actual authentication implementation
 
 	if len(productKey) != 10 {
 		return nil, status.Error(codes.Unauthenticated, "Invalid credentials")
@@ -75,7 +47,7 @@ func (s *authServer) Authenticate(ctx context.Context, req *pbAuth.AuthRequest) 
 	}
 
 	// Create the response with the generated token
-	response := &pbAuth.AuthResponse{
+	response := &pbEngine.AuthResponse{
 		TokenValue: token,
 	}
 
@@ -91,150 +63,123 @@ func GenerateJWTToken(claims jwt.Claims, secretKey string) (string, error) {
 	return tokenString, nil
 }
 
-func ExtractTokenFromContext(ctx context.Context) (string, error) {
-	md, ok := metadata.FromIncomingContext(ctx)
-	if !ok {
-		return "", status.Errorf(codes.Unauthenticated, "Missing metadata")
+func (s *engineServer) StartServer(ctx context.Context, req *pbEngine.ServerRequest) (*pbEngine.ServerResponse, error) {
+	server := req.ServiceName
+
+	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	if err != nil {
+		log.Printf("Failed to connect to Docker daemon: %v", err)
+		return &pbEngine.ServerResponse{
+			Message: "Failed to connect to Docker daemon",
+		}, err
+	}
+	defer cli.Close()
+
+	// Set the image name for the ApexDrive microservice
+	imageName := server + "-image:latest" // Replace with the actual image name
+
+	// Pull the latest image (optional, but recommended)
+	reader, err := cli.ImagePull(ctx, imageName, types.ImagePullOptions{})
+	if err != nil {
+		log.Printf("Failed to pull Docker image: %v", err)
+		return &pbEngine.ServerResponse{
+			Message: "Failed to pull Docker image",
+		}, err
+	}
+	defer reader.Close()
+
+	containerName := server + "-container"
+	// Create and start the container
+	resp, err := cli.ContainerCreate(ctx, &container.Config{
+		Image: imageName,
+	}, nil, nil, nil, containerName)
+	if err != nil {
+		log.Printf("Failed to create Docker container: %v", err)
+		return &pbEngine.ServerResponse{
+			Message: "Failed to create Docker container",
+		}, err
 	}
 
-	tokens := md.Get("authorization")
-	if len(tokens) == 0 {
-		return "", status.Errorf(codes.Unauthenticated, "Missing authentication token")
+	if err := cli.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
+		log.Printf("Failed to start Docker container: %v", err)
+		return &pbEngine.ServerResponse{
+			Message: "Failed to start Docker container",
+		}, err
 	}
 
-	token := tokens[0] // Assuming a single token is present in the header
-	return token, nil
+	// Container started successfully
+	return &pbEngine.ServerResponse{
+		Message: server + " started successfully",
+	}, nil
+
 }
 
-func (*apexDriveServer) Healthcheck(ctx context.Context, request *pbApexDrive.HealthCheckRequest) (*pbApexDrive.HealthCheckResponse, error) {
-	Token, err := ExtractTokenFromContext(ctx)
+func (s *engineServer) StopServer(ctx context.Context, req *pbEngine.ServerRequest) (*pbEngine.ServerResponse, error) {
+	server := req.ServiceName
+	// Here, you can use the Docker SDK to start the corresponding microservice container.
+	// Implement the logic to start the microservice container based on the 'microservice' parameter.
+	// Connect to the Docker daemon
+	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
-		log.Printf("%v", err)
-		return &pbApexDrive.HealthCheckResponse{HealthStatus: false}, status.Errorf(codes.Unauthenticated, "Missing authentication token")
+		log.Printf("Failed to connect to Docker daemon: %v", err)
+		return &pbEngine.ServerResponse{
+			Message: "Failed to connect to Docker daemon",
+		}, err
 	}
-	log.Printf("Token: %v", Token)
-	if request.RequestValue == 1 {
-		return &pbApexDrive.HealthCheckResponse{HealthStatus: true}, nil
-	}
-	return &pbApexDrive.HealthCheckResponse{HealthStatus: false}, status.Errorf(codes.Unavailable, "Wrong Request")
-}
+	defer cli.Close()
 
-// MaleniaService implementation
-func (*maleniaServer) HealthCheck(ctx context.Context, request *pbMalenia.HealthCheckRequest) (*pbMalenia.HealthCheckResponse, error) {
-	Token, err := ExtractTokenFromContext(ctx)
+	// Find the container by name
+	containerName := server + "-container" // Replace with the appropriate naming convention
+	runningContainers, err := cli.ContainerList(ctx, types.ContainerListOptions{
+		Filters: filters.NewArgs(filters.Arg("name", containerName)),
+	})
 	if err != nil {
-		log.Printf("%v", err)
-		return &pbMalenia.HealthCheckResponse{HealthStatus: false}, status.Errorf(codes.Unauthenticated, "Missing authentication token")
+		log.Printf("Failed to list containers: %v", err)
+		return &pbEngine.ServerResponse{
+			Message: "Failed to list containers",
+		}, err
 	}
-	log.Printf("Token: %v", Token)
-	if request.RequestValue == 1 {
-		return &pbMalenia.HealthCheckResponse{HealthStatus: true}, nil
-	}
-	return &pbMalenia.HealthCheckResponse{HealthStatus: false}, status.Errorf(codes.Unavailable, "Wrong Request")
-}
 
-// TimeSquaredService implementation
-func (*timeSquaredServer) HealthCheck(ctx context.Context, request *pbTimeSquared.HealthCheckRequest) (*pbTimeSquared.HealthCheckResponse, error) {
-	Token, err := ExtractTokenFromContext(ctx)
-	if err != nil {
-		log.Printf("%v", err)
-		return &pbTimeSquared.HealthCheckResponse{HealthStatus: false}, status.Errorf(codes.Unauthenticated, "Missing authentication token")
+	// If the container is not found, it means it's not running
+	if len(runningContainers) == 0 {
+		log.Printf("%s container is not running.", server)
+		return &pbEngine.ServerResponse{
+			Message: server + " container is not running",
+		}, nil
 	}
-	log.Printf("Token: %v", Token)
-	if request.RequestValue == 1 {
-		return &pbTimeSquared.HealthCheckResponse{HealthStatus: true}, nil
-	}
-	return &pbTimeSquared.HealthCheckResponse{HealthStatus: false}, status.Errorf(codes.Unavailable, "Wrong Request")
-}
 
-func (*indriyasServer) Healthcheck(ctx context.Context, request *pbIndriyas.HealthCheckRequest) (*pbIndriyas.HealthCheckResponse, error) {
-	Token, err := ExtractTokenFromContext(ctx)
-	if err != nil {
-		log.Printf("%v", err)
-		return &pbIndriyas.HealthCheckResponse{HealthStatus: false}, status.Errorf(codes.Unauthenticated, "Missing authentication token")
+	// Stop the container
+	containerID := runningContainers[0].ID
+	timeout := 5 * time.Second
+	timeoutSeconds := int(timeout.Seconds())
+	stopOptions := container.StopOptions{
+		Timeout: &timeoutSeconds,
 	}
-	log.Printf("Token: %v", Token)
-	if request.RequestValue == 1 {
-		return &pbIndriyas.HealthCheckResponse{HealthStatus: true}, nil
-	}
-	return &pbIndriyas.HealthCheckResponse{HealthStatus: false}, status.Errorf(codes.Unavailable, "Wrong Request")
-}
 
-func (*neithServer) HealthCheck(ctx context.Context, request *pbNeith.HealthCheckRequest) (*pbNeith.HealthCheckResponse, error) {
-	Token, err := ExtractTokenFromContext(ctx)
-	if err != nil {
-		log.Printf("%v", err)
-		return &pbNeith.HealthCheckResponse{HealthStatus: false}, status.Errorf(codes.Unauthenticated, "Missing authentication token")
+	if err := cli.ContainerStop(ctx, containerID, stopOptions); err != nil {
+		log.Printf("Failed to stop Docker container: %v", err)
+		return &pbEngine.ServerResponse{
+			Message: "Failed to stop Docker container",
+		}, err
 	}
-	log.Printf("Token: %v", Token)
-	if request.RequestValue == 1 {
-		return &pbNeith.HealthCheckResponse{HealthStatus: true}, nil
-	}
-	return &pbNeith.HealthCheckResponse{HealthStatus: false}, status.Errorf(codes.Unavailable, "Wrong Request")
-}
+	// Container stopped successfully
+	return &pbEngine.ServerResponse{
+		Message: server + " stopped successfully",
+	}, nil
 
-func (*dockerServer) StartService(ctx context.Context, request *pbDocker.DockerRequest) (*pbDocker.DockerResponse, error) {
-	Token, err := ExtractTokenFromContext(ctx)
-	if err != nil {
-		log.Printf("%v", err)
-		return &pbDocker.DockerResponse{}, status.Errorf(codes.Unauthenticated, "Missing authentication token")
-	}
-	log.Printf("Token: %v", Token)
-	log.Printf("%v started.", request.ServiceName)
-	return &pbDocker.DockerResponse{}, nil
-}
-
-func (*dockerServer) StopService(ctx context.Context, request *pbDocker.DockerRequest) (*pbDocker.DockerResponse, error) {
-	Token, err := ExtractTokenFromContext(ctx)
-	if err != nil {
-		log.Printf("%v", err)
-		return &pbDocker.DockerResponse{}, status.Errorf(codes.Unauthenticated, "Missing authentication token")
-	}
-	log.Printf("Token: %v", Token)
-	log.Printf("%v Stopped.", request.ServiceName)
-	return &pbDocker.DockerResponse{}, nil
 }
 
 func main() {
-	// Create a listener on TCP port
-	lis, err := net.Listen("tcp", ":8080")
+	lis, err := net.Listen("tcp", ":10000")
 	if err != nil {
-		log.Fatalln("Failed to listen:", err)
+		log.Fatalf("failed to listen: %v", err)
 	}
+	grpcServer := grpc.NewServer()
 
-	// Create a gRPC server object
-	s := grpc.NewServer()
-	pbAuth.RegisterAuthServiceServer(s, &authServer{})
-	// Attach the Greeter service to the server
+	pbEngine.RegisterMicroserviceControllerServer(grpcServer, &engineServer{})
 
-	pbApexDrive.RegisterApexDriveServiceServer(s, &apexDriveServer{})
-	pbMalenia.RegisterMaleniaServiceServer(s, &maleniaServer{})
-	pbTimeSquared.RegisterTimeSquaredServiceServer(s, &timeSquaredServer{})
-	pbIndriyas.RegisterIndriyasServiceServer(s, &indriyasServer{})
-	pbNeith.RegisterNeithServiceServer(s, &neithServer{})
-	pbDocker.RegisterDockerServiceServer(s, &dockerServer{})
-
-	// Serve gRPC server
-	log.Println("Serving gRPC on 0.0.0.0:8080")
-	go func() {
-		log.Fatalln(s.Serve(lis))
-	}()
-
-	// Create a client connection to the gRPC server we just started
-
-	if err != nil {
-		log.Fatalln("Failed to dial server:", err)
+	log.Println("Serving gRPC on 0.0.0.0:10000")
+	if err := grpcServer.Serve(lis); err != nil {
+		log.Fatalf("failed to serve: %v", err)
 	}
-
-	// Create a new ServeMux for the gRPC-Gateway
-	gwmux := runtime.NewServeMux()
-
-	// Create a new HTTP server for the gRPC-Gateway
-	gwServer := &http.Server{
-		Addr:    ":8090",
-		Handler: gwmux,
-	}
-
-	log.Println("Serving gRPC-Gateway on http://0.0.0.0:8090")
-	log.Fatalln(gwServer.ListenAndServe())
 }
