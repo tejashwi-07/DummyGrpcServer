@@ -12,10 +12,11 @@ import (
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
-
+	"github.com/docker/go-connections/nat"
 	pbEngine "github.com/tejashwi-07/DummyGrpcServer/proto/engine"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/reflection"
 	"google.golang.org/grpc/status"
 )
 
@@ -25,7 +26,7 @@ type engineServer struct {
 
 func (s *engineServer) Authenticate(ctx context.Context, req *pbEngine.AuthRequest) (*pbEngine.AuthResponse, error) {
 	productKey := req.ProductKey
-
+	log.Printf("product key: %v", productKey)
 	if len(productKey) != 10 {
 		return nil, status.Error(codes.Unauthenticated, "Invalid credentials")
 	}
@@ -65,7 +66,6 @@ func GenerateJWTToken(claims jwt.Claims, secretKey string) (string, error) {
 
 func (s *engineServer) StartServer(ctx context.Context, req *pbEngine.ServerRequest) (*pbEngine.ServerResponse, error) {
 	server := req.ServiceName
-
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
 		log.Printf("Failed to connect to Docker daemon: %v", err)
@@ -77,22 +77,27 @@ func (s *engineServer) StartServer(ctx context.Context, req *pbEngine.ServerRequ
 
 	// Set the image name for the ApexDrive microservice
 	imageName := server + "-image:latest" // Replace with the actual image name
-
-	// Pull the latest image (optional, but recommended)
-	reader, err := cli.ImagePull(ctx, imageName, types.ImagePullOptions{})
-	if err != nil {
-		log.Printf("Failed to pull Docker image: %v", err)
-		return &pbEngine.ServerResponse{
-			Message: "Failed to pull Docker image",
-		}, err
-	}
-	defer reader.Close()
+	log.Printf("image:%v", imageName)
 
 	containerName := server + "-container"
+
+
 	// Create and start the container
 	resp, err := cli.ContainerCreate(ctx, &container.Config{
 		Image: imageName,
-	}, nil, nil, nil, containerName)
+		ExposedPorts: nat.PortSet{
+			"10001/tcp": struct{}{},
+		},
+	}, &container.HostConfig{
+		PortBindings: nat.PortMap{
+			"10001/tcp": []nat.PortBinding{
+				{
+					HostIP:   "0.0.0.0",
+					HostPort: "10001",
+				},
+			},
+		},
+	}, nil, nil, containerName)
 	if err != nil {
 		log.Printf("Failed to create Docker container: %v", err)
 		return &pbEngine.ServerResponse{
@@ -177,6 +182,7 @@ func main() {
 	grpcServer := grpc.NewServer()
 
 	pbEngine.RegisterMicroserviceControllerServer(grpcServer, &engineServer{})
+	reflection.Register(grpcServer)
 
 	log.Println("Serving gRPC on 0.0.0.0:10000")
 	if err := grpcServer.Serve(lis); err != nil {

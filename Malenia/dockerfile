@@ -15,3 +15,4 @@ EXPOSE 10004
 
 # Set the command to run the apexdrive service
 CMD ["./malenia-server"]
+

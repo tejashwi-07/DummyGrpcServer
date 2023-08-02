@@ -2,20 +2,19 @@ version: '3.8'
 
 services:
   nginx:
-    image: img-nginx:latest
+    image: nginx-image:latest
     ports:
-      - "80:80"
-    restart: "always"
-    networks:
-      - my_network
+      - "8099:8099"
+    # networks:
+    #   - my_network
 
   engine:
-    image: img-engine:latest
-    ports:  
-      - "10000:10000"
-    restart: "always"
-    networks:
-      - my_network
+    image: engine-image:latest
+    ports:
+      - 10000:10000
+    # network_mode: "host"
+    # networks:
+    #   - my_network
   
 
 networks:

@@ -1,17 +1,25 @@
-# Use the official Go module image as the base image
-FROM golang:1.17
+# Use the golang base image with a specific Go version
+FROM golang:1.17 as builder
 
-# Set the working directory inside the container
+# Set the working directory to /app
 WORKDIR /go/src/apexdrive
 
-# Copy the entire apexdrive directory to the container's working directory
-COPY . .
+# Copy the binary file from the host into the container's working directory
+COPY apexdrive-server .
 
-# Build the Go binary of the apexdrive service
-RUN go build -o apexdrive-server
+# Set the final base image for the runtime container
+FROM golang:1.17
 
-# Expose port 10001 for gRPC server
+# Set the working directory to /app
+WORKDIR /app
+
+# Copy the binary from the previous builder stage into the final container
+COPY --from=builder /go/src/apexdrive/apexdrive-server .
+
+# Expose the port on which your Go server listens (replace 8080 with the actual port).
 EXPOSE 10001
 
-# Set the command to run the apexdrive service
+# Command to run your Go server when the container starts.
 CMD ["./apexdrive-server"]
+
+

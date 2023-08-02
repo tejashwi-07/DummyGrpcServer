@@ -10,6 +10,7 @@ import (
 	pbApexDrive "github.com/tejashwi-07/DummyGrpcServer/proto/apexdrive"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/reflection"
 	"google.golang.org/grpc/status"
 )
 
@@ -37,6 +38,8 @@ func main() {
 	s := grpc.NewServer()
 
 	pbApexDrive.RegisterApexDriveServiceServer(s, &apexdriveServer{})
+
+	reflection.Register(s)
 
 	// Serve gRPC server
 	log.Println("Serving gRPC on 0.0.0.0:10001")
