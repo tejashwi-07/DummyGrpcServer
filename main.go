@@ -66,6 +66,7 @@ func GenerateJWTToken(claims jwt.Claims, secretKey string) (string, error) {
 
 func (s *engineServer) StartServer(ctx context.Context, req *pbEngine.ServerRequest) (*pbEngine.ServerResponse, error) {
 	server := req.ServiceName
+	log.Printf("Trying to ignite service : %s\n", server)
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
 		log.Printf("Failed to connect to Docker daemon: %v", err)
@@ -80,8 +81,6 @@ func (s *engineServer) StartServer(ctx context.Context, req *pbEngine.ServerRequ
 	log.Printf("image:%v", imageName)
 
 	containerName := server + "-container"
-
-
 	// Create and start the container
 	resp, err := cli.ContainerCreate(ctx, &container.Config{
 		Image: imageName,
@@ -114,7 +113,7 @@ func (s *engineServer) StartServer(ctx context.Context, req *pbEngine.ServerRequ
 
 	// Container started successfully
 	return &pbEngine.ServerResponse{
-		Message: server + " started successfully",
+		Message: server + " started successfully-----------",
 	}, nil
 
 }
@@ -124,6 +123,7 @@ func (s *engineServer) StopServer(ctx context.Context, req *pbEngine.ServerReque
 	// Here, you can use the Docker SDK to start the corresponding microservice container.
 	// Implement the logic to start the microservice container based on the 'microservice' parameter.
 	// Connect to the Docker daemon
+
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
 		log.Printf("Failed to connect to Docker daemon: %v", err)
@@ -167,7 +167,21 @@ func (s *engineServer) StopServer(ctx context.Context, req *pbEngine.ServerReque
 			Message: "Failed to stop Docker container",
 		}, err
 	}
-	// Container stopped successfully
+	// Removing the container
+
+	removeOptions := types.ContainerRemoveOptions{
+		RemoveVolumes: true,
+		Force:         true,
+	}
+
+	if err := cli.ContainerRemove(ctx, containerID, removeOptions); err != nil {
+		log.Printf("Unable to remove container: %s", err)
+		return &pbEngine.ServerResponse{
+			Message: "Failed to stop Docker container",
+		}, err
+	}
+
+	//Container stopped and removed successfully
 	return &pbEngine.ServerResponse{
 		Message: server + " stopped successfully",
 	}, nil
