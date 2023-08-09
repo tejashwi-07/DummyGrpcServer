@@ -5,6 +5,7 @@ go 1.20
 require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/docker/docker v24.0.5+incompatible
+	github.com/docker/go-connections v0.4.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.16.1
 	google.golang.org/grpc v1.56.2
 	google.golang.org/protobuf v1.31.0
@@ -13,7 +14,6 @@ require (
 require (
 	github.com/Microsoft/go-winio v0.6.1 // indirect
 	github.com/docker/distribution v2.8.2+incompatible // indirect
-	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/glog v1.1.1 // indirect
