@@ -1,4 +1,4 @@
-module github.com/tejashwi-07/DummyGrpcServer
+module github.com/Tarran-Sidhaarth/DummyGrpcServer
 
 go 1.20
 

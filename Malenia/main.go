@@ -6,8 +6,8 @@ import (
 	"net"
 	"net/http"
 
+	pbMalenia "github.com/Tarran-Sidhaarth/DummyGrpcServer/proto/malenia"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
-	pbMalenia "github.com/tejashwi-07/DummyGrpcServer/proto/malenia"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 

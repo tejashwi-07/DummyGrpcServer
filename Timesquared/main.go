@@ -6,8 +6,8 @@ import (
 	"net"
 	"net/http"
 
+	pbTimeSquared "github.com/Tarran-Sidhaarth/DummyGrpcServer/proto/timesquared"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
-	pbTimeSquared "github.com/tejashwi-07/DummyGrpcServer/proto/timesquared"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"

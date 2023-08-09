@@ -6,8 +6,8 @@ import (
 	"net"
 	"net/http"
 
+	pbIndriyas "github.com/Tarran-Sidhaarth/DummyGrpcServer/proto/indriyas"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
-	pbIndriyas "github.com/tejashwi-07/DummyGrpcServer/proto/indriyas"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"

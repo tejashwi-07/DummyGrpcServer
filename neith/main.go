@@ -6,8 +6,8 @@ import (
 	"net"
 	"net/http"
 
+	pbNeith "github.com/Tarran-Sidhaarth/DummyGrpcServer/proto/neith"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
-	pbNeith "github.com/tejashwi-07/DummyGrpcServer/proto/neith"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 
