@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"encoding/json"
+	"io"
 	"log"
 	"net"
 	"time"
@@ -110,7 +112,7 @@ func (s *engineServer) StartServer(ctx context.Context, req *pbEngine.ServerRequ
 			Message: "Failed to start Docker container",
 		}, err
 	}
-
+	go GetStats(context.Background(), resp.ID)
 	// Container started successfully
 	return &pbEngine.ServerResponse{
 		Message: server + " started successfully-----------",
@@ -188,16 +190,54 @@ func (s *engineServer) StopServer(ctx context.Context, req *pbEngine.ServerReque
 
 }
 
+func GetStats(ctx context.Context, containerId string) {
+	server := "req.ServiceName" // change when protos are changes
+	log.Printf("Getting stats of the service %s\n", server)
+	//time.Sleep(time.Second * 10)
+	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	if err != nil {
+		log.Fatalf("Failed to connect to Docker daemon: %v", err)
+		// return &pbEngine.ServerResponse{
+		// 	Message: "Failed to connect to Docker daemon",
+		// }, err
+	}
+	defer cli.Close()
+	stats, err := cli.ContainerStats(ctx, containerId, true)
+	if err != nil {
+		log.Fatalf("Failed to get stats of Docker container: %v", err)
+		// return &pbEngine.ServerResponse{
+		// 	Message: "Failed to get stats of  Docker container",
+		// }, err
+	}
+	defer stats.Body.Close()
+	var stat types.StatsJSON
+	for {
+		decoder := json.NewDecoder(stats.Body)
+		if err := decoder.Decode(&stat); err != nil {
+			if err == io.EOF {
+				return
+			}
+			log.Fatalf("Failed to get stats of Docker container : %v", err)
+			// return &pbEngine.ServerResponse{
+			// 	Message: "Failed to get stats of  Docker container",
+			// }, err
+		}
+		log.Printf("CPU Usage: %d\n", stat.CPUStats.CPUUsage.TotalUsage)
+		log.Printf("Memory Usage: %d\n", stat.MemoryStats.Usage)
+	}
+	// return &pbEngine.ServerResponse{
+	// 	Message: server + " gotten stats successfully",
+	// }, nil
+}
+
 func main() {
 	lis, err := net.Listen("tcp", ":10000")
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
 	grpcServer := grpc.NewServer()
-
 	pbEngine.RegisterMicroserviceControllerServer(grpcServer, &engineServer{})
 	reflection.Register(grpcServer)
-
 	log.Println("Serving gRPC on 0.0.0.0:10000")
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
