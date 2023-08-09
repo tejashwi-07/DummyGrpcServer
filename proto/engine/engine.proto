@@ -9,6 +9,7 @@ service MicroserviceController {
   rpc Authenticate(AuthRequest) returns (AuthResponse) {}
   rpc StartServer(ServerRequest) returns (ServerResponse) {}
   rpc StopServer(ServerRequest) returns (ServerResponse) {}
+  rpc GetServerStats(ServerRequest) returns (stream ServerResponse) {}
 }
 
 message AuthRequest {

@@ -2,8 +2,11 @@ package main
 
 import (
 	"context"
+	"encoding/json"
+	"io"
 	"log"
 	"net"
+	"strconv"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -66,6 +69,7 @@ func GenerateJWTToken(claims jwt.Claims, secretKey string) (string, error) {
 
 func (s *engineServer) StartServer(ctx context.Context, req *pbEngine.ServerRequest) (*pbEngine.ServerResponse, error) {
 	server := req.ServiceName
+	log.Printf("Trying to ignite service : %s\n", server)
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
 		log.Printf("Failed to connect to Docker daemon: %v", err)
@@ -80,8 +84,6 @@ func (s *engineServer) StartServer(ctx context.Context, req *pbEngine.ServerRequ
 	log.Printf("image:%v", imageName)
 
 	containerName := server + "-container"
-
-
 	// Create and start the container
 	resp, err := cli.ContainerCreate(ctx, &container.Config{
 		Image: imageName,
@@ -111,10 +113,10 @@ func (s *engineServer) StartServer(ctx context.Context, req *pbEngine.ServerRequ
 			Message: "Failed to start Docker container",
 		}, err
 	}
-
+	go GetStats(context.Background(), resp.ID)
 	// Container started successfully
 	return &pbEngine.ServerResponse{
-		Message: server + " started successfully",
+		Message: server + " started successfully-----------",
 	}, nil
 
 }
@@ -124,6 +126,7 @@ func (s *engineServer) StopServer(ctx context.Context, req *pbEngine.ServerReque
 	// Here, you can use the Docker SDK to start the corresponding microservice container.
 	// Implement the logic to start the microservice container based on the 'microservice' parameter.
 	// Connect to the Docker daemon
+
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
 		log.Printf("Failed to connect to Docker daemon: %v", err)
@@ -167,11 +170,113 @@ func (s *engineServer) StopServer(ctx context.Context, req *pbEngine.ServerReque
 			Message: "Failed to stop Docker container",
 		}, err
 	}
-	// Container stopped successfully
+	// Removing the container
+
+	removeOptions := types.ContainerRemoveOptions{
+		RemoveVolumes: true,
+		Force:         true,
+	}
+
+	if err := cli.ContainerRemove(ctx, containerID, removeOptions); err != nil {
+		log.Printf("Unable to remove container: %s", err)
+		return &pbEngine.ServerResponse{
+			Message: "Failed to stop Docker container",
+		}, err
+	}
+
+	//Container stopped and removed successfully
 	return &pbEngine.ServerResponse{
 		Message: server + " stopped successfully",
 	}, nil
 
+}
+
+func GetStats(ctx context.Context, containerId string) {
+	server := "req.ServiceName" // change when protos are changes
+	log.Printf("Getting stats of the service %s\n", server)
+	//time.Sleep(time.Second * 10)
+	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	if err != nil {
+		log.Fatalf("Failed to connect to Docker daemon: %v", err)
+		// return &pbEngine.ServerResponse{
+		// 	Message: "Failed to connect to Docker daemon",
+		// }, err
+	}
+	defer cli.Close()
+	stats, err := cli.ContainerStats(ctx, containerId, true)
+	if err != nil {
+		log.Fatalf("Failed to get stats of Docker container: %v", err)
+		// return &pbEngine.ServerResponse{
+		// 	Message: "Failed to get stats of  Docker container",
+		// }, err
+	}
+	defer stats.Body.Close()
+	var stat types.StatsJSON
+	for {
+		decoder := json.NewDecoder(stats.Body)
+		if err := decoder.Decode(&stat); err != nil {
+			if err == io.EOF {
+				return
+			}
+			log.Fatalf("Failed to get stats of Docker container : %v", err)
+			// return &pbEngine.ServerResponse{
+			// 	Message: "Failed to get stats of  Docker container",
+			// }, err
+		}
+		log.Printf("CPU Usage: %d\n", stat.CPUStats.CPUUsage.TotalUsage)
+		log.Printf("Memory Usage: %d\n", stat.MemoryStats.Usage)
+	}
+	// return &pbEngine.ServerResponse{
+	// 	Message: server + " gotten stats successfully",
+	// }, nil
+}
+
+func (s *engineServer) GetServerStats(req *pbEngine.ServerRequest, stream pbEngine.MicroserviceController_GetServerStatsServer) error {
+	server := req.ServiceName
+	containerName := server + "-container"
+	log.Printf("Getting stats of the service %s\n", server)
+	//time.Sleep(time.Second * 10)
+	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	if err != nil {
+		log.Printf("Failed to connect to Docker daemon: %v", err)
+		return err
+		// return &pbEngine.ServerResponse{
+		// 	Message: "Failed to connect to Docker daemon",
+		// }, err
+	}
+	defer cli.Close()
+	ctx := context.Background()
+	stats, err := cli.ContainerStats(ctx, containerName, true)
+	if err != nil {
+		log.Printf("Failed to get stats of Docker container: %v", err)
+		return err
+		// return &pbEngine.ServerResponse{
+		// 	Message: "Failed to get stats of  Docker container",
+		// }, err
+	}
+	defer stats.Body.Close()
+	var stat types.StatsJSON
+	for {
+		decoder := json.NewDecoder(stats.Body)
+		if err := decoder.Decode(&stat); err != nil {
+			if err == io.EOF {
+				return err
+			}
+			log.Fatalf("Failed to get stats of Docker container : %v", err)
+			// return &pbEngine.ServerResponse{
+			// 	Message: "Failed to get stats of  Docker container",
+			// }, err
+		}
+		res := &pbEngine.ServerResponse{
+			Message: "Cpu Usage " + strconv.FormatUint(stat.CPUStats.CPUUsage.TotalUsage, 10) + "\nMemory Usage " + strconv.FormatUint(stat.MemoryStats.Usage, 10),
+		}
+		if err := stream.Send(res); err != nil {
+			return err
+		}
+		//log.Printf("CPU Usage: %d\n", stat.CPUStats.CPUUsage.TotalUsage)
+		//log.Printf("Memory Usage: %d\n", stat.MemoryStats.Usage)
+	}
+	//return nil
 }
 
 func main() {
@@ -180,10 +285,8 @@ func main() {
 		log.Fatalf("failed to listen: %v", err)
 	}
 	grpcServer := grpc.NewServer()
-
 	pbEngine.RegisterMicroserviceControllerServer(grpcServer, &engineServer{})
 	reflection.Register(grpcServer)
-
 	log.Println("Serving gRPC on 0.0.0.0:10000")
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
