@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package engine;
 
-option go_package = "github.com/tejashwi-07/DummyGrpcServer/proto;engine";
+option go_package = "github.com/Tarran-Sidhaarth/DummyGrpcServer/proto/engine";
 
 
 service MicroserviceController {

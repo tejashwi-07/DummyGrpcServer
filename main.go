@@ -192,57 +192,40 @@ func (s *engineServer) StopServer(ctx context.Context, req *pbEngine.ServerReque
 }
 
 func GetStats(ctx context.Context, containerId string) {
-	server := "req.ServiceName" // change when protos are changes
+	server := "req.ServiceName"
 	log.Printf("Getting stats of the service %s\n", server)
-	//time.Sleep(time.Second * 10)
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
 		log.Fatalf("Failed to connect to Docker daemon: %v", err)
-		// return &pbEngine.ServerResponse{
-		// 	Message: "Failed to connect to Docker daemon",
-		// }, err
 	}
 	defer cli.Close()
-	stats, err := cli.ContainerStats(ctx, containerId, true)
+	stats, err := cli.ContainerStats(ctx, "apexdrive-container", true)
 	if err != nil {
 		log.Fatalf("Failed to get stats of Docker container: %v", err)
-		// return &pbEngine.ServerResponse{
-		// 	Message: "Failed to get stats of  Docker container",
-		// }, err
 	}
 	defer stats.Body.Close()
 	var stat types.StatsJSON
+	decoder := json.NewDecoder(stats.Body)
 	for {
-		decoder := json.NewDecoder(stats.Body)
 		if err := decoder.Decode(&stat); err != nil {
 			if err == io.EOF {
 				return
 			}
 			log.Fatalf("Failed to get stats of Docker container : %v", err)
-			// return &pbEngine.ServerResponse{
-			// 	Message: "Failed to get stats of  Docker container",
-			// }, err
 		}
 		log.Printf("CPU Usage: %d\n", stat.CPUStats.CPUUsage.TotalUsage)
 		log.Printf("Memory Usage: %d\n", stat.MemoryStats.Usage)
 	}
-	// return &pbEngine.ServerResponse{
-	// 	Message: server + " gotten stats successfully",
-	// }, nil
 }
 
 func (s *engineServer) GetServerStats(req *pbEngine.ServerRequest, stream pbEngine.MicroserviceController_GetServerStatsServer) error {
 	server := req.ServiceName
 	containerName := server + "-container"
 	log.Printf("Getting stats of the service %s\n", server)
-	//time.Sleep(time.Second * 10)
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
 		log.Printf("Failed to connect to Docker daemon: %v", err)
 		return err
-		// return &pbEngine.ServerResponse{
-		// 	Message: "Failed to connect to Docker daemon",
-		// }, err
 	}
 	defer cli.Close()
 	ctx := context.Background()
@@ -250,31 +233,24 @@ func (s *engineServer) GetServerStats(req *pbEngine.ServerRequest, stream pbEngi
 	if err != nil {
 		log.Printf("Failed to get stats of Docker container: %v", err)
 		return err
-		// return &pbEngine.ServerResponse{
-		// 	Message: "Failed to get stats of  Docker container",
-		// }, err
 	}
 	defer stats.Body.Close()
 	var stat types.StatsJSON
+	decoder := json.NewDecoder(stats.Body)
 	for {
-		decoder := json.NewDecoder(stats.Body)
 		if err := decoder.Decode(&stat); err != nil {
 			if err == io.EOF {
 				return err
 			}
 			log.Fatalf("Failed to get stats of Docker container : %v", err)
-			// return &pbEngine.ServerResponse{
-			// 	Message: "Failed to get stats of  Docker container",
-			// }, err
 		}
 		res := &pbEngine.ServerResponse{
-			Message: "Cpu Usage " + strconv.FormatUint(stat.CPUStats.CPUUsage.TotalUsage, 10) + "\nMemory Usage " + strconv.FormatUint(stat.MemoryStats.Usage, 10),
+			Message: "Cpu Usage " + strconv.FormatUint(stat.CPUStats.CPUUsage.TotalUsage, 10) + " Memory Usage " + strconv.FormatUint(stat.MemoryStats.Usage, 10),
 		}
 		if err := stream.Send(res); err != nil {
+			log.Printf("%v", err)
 			return err
 		}
-		//log.Printf("CPU Usage: %d\n", stat.CPUStats.CPUUsage.TotalUsage)
-		//log.Printf("Memory Usage: %d\n", stat.MemoryStats.Usage)
 	}
 	//return nil
 }
