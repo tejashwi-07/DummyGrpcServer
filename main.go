@@ -113,7 +113,6 @@ func (s *engineServer) StartServer(ctx context.Context, req *pbEngine.ServerRequ
 			Message: "Failed to start Docker container",
 		}, err
 	}
-	go GetStats(context.Background(), resp.ID)
 	// Container started successfully
 	return &pbEngine.ServerResponse{
 		Message: server + " started successfully-----------",
@@ -191,33 +190,6 @@ func (s *engineServer) StopServer(ctx context.Context, req *pbEngine.ServerReque
 
 }
 
-func GetStats(ctx context.Context, containerId string) {
-	server := "req.ServiceName"
-	log.Printf("Getting stats of the service %s\n", server)
-	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
-	if err != nil {
-		log.Fatalf("Failed to connect to Docker daemon: %v", err)
-	}
-	defer cli.Close()
-	stats, err := cli.ContainerStats(ctx, "apexdrive-container", true)
-	if err != nil {
-		log.Fatalf("Failed to get stats of Docker container: %v", err)
-	}
-	defer stats.Body.Close()
-	var stat types.StatsJSON
-	decoder := json.NewDecoder(stats.Body)
-	for {
-		if err := decoder.Decode(&stat); err != nil {
-			if err == io.EOF {
-				return
-			}
-			log.Fatalf("Failed to get stats of Docker container : %v", err)
-		}
-		log.Printf("CPU Usage: %d\n", stat.CPUStats.CPUUsage.TotalUsage)
-		log.Printf("Memory Usage: %d\n", stat.MemoryStats.Usage)
-	}
-}
-
 func (s *engineServer) GetServerStats(req *pbEngine.ServerRequest, stream pbEngine.MicroserviceController_GetServerStatsServer) error {
 	server := req.ServiceName
 	containerName := server + "-container"
@@ -236,7 +208,7 @@ func (s *engineServer) GetServerStats(req *pbEngine.ServerRequest, stream pbEngi
 	}
 	defer stats.Body.Close()
 	var stat types.StatsJSON
-	decoder := json.NewDecoder(stats.Body)
+	decoder := json.NewDecoder(stats.Body) //decoding the stream
 	for {
 		if err := decoder.Decode(&stat); err != nil {
 			if err == io.EOF {
