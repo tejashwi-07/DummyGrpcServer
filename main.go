@@ -252,7 +252,6 @@ func (s *engineServer) GetServerStats(req *pbEngine.ServerRequest, stream pbEngi
 			return err
 		}
 	}
-	//return nil
 }
 
 func main() {
